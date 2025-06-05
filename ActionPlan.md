@@ -15,9 +15,9 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 ### 0.2. Mise en place Prisma/PostgreSQL
 - [x] Installer Prisma et initialiser la configuration
 - [x] Créer le fichier `.env` avec la bonne `DATABASE_URL`
-- [ ] Définir les modèles dans `prisma/schema.prisma` (User, etc.)
-- [ ] Générer le client Prisma et migrer la base
-- [ ] Implémenter les hooks et services d'authentification Prisma
+- [x] Définir les modèles dans `prisma/schema.prisma` (User, etc.)
+- [x] Générer le client Prisma et migrer la base (reset inclus)
+- [x] Implémenter les hooks et services d'authentification Prisma (hash, gestion rôle, profil creator)
 - [ ] Adapter les pages (Auth, etc.) pour utiliser Prisma
 
 ---
@@ -26,16 +26,16 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 
 ### 1.1. Authentification
 - [ ] Implémenter l'écran d'accueil avec options "S'inscrire" et "Se connecter"
-- [ ] Authentification par email/mot de passe (Prisma)
+- [x] Authentification par email/mot de passe (Prisma)
 - [ ] Authentification sociale (Apple, Google)
 - [ ] Authentification par téléphone (OTP)
 - [ ] Validation 2FA (optionnel)
-- [ ] Gestion des erreurs et feedback utilisateur
+- [x] Gestion des erreurs et feedback utilisateur
 
 ### 1.2. Création et gestion de profil
-- [ ] Formulaire de création de profil (pseudo, avatar)
+- [x] Formulaire de création de profil (pseudo, avatar)
 - [ ] Modification du profil utilisateur
-- [ ] Gestion des types de compte (créateur, utilisateur)
+- [x] Gestion des types de compte (créateur, utilisateur)
 
 ---
 
