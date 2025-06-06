@@ -16,7 +16,7 @@ XDose combine les forces d'Instagram (social, feed, stories), des principes Appl
 - Navigation gestuelle intuitive
 
 ## 4. Fonctionnalités Clés
-- Feed personnalisé (photos, vidéos, texte)
+- Feed personnalisé (photos, vidéos, texte) — **Feed vertical accessible et intégré**
 - Stories immersives
 - Découverte IA de contenus/créateurs
 - Studio de création assisté IA (édition, templates, collaboration)
@@ -29,8 +29,8 @@ XDose combine les forces d'Instagram (social, feed, stories), des principes Appl
 ## 5. Parcours Utilisateurs Critiques
 - Inscription/connexion simplifiée
 - **Après authentification, l'utilisateur est automatiquement redirigé vers la page Discover (découverte/Feed général), pour maximiser l'engagement et l'exploration de la plateforme avant toute navigation ciblée.**
-- Navigation feed personnalisé
-- Découverte de contenus/créateurs
+- Navigation feed personnalisé (onglet Feed vertical accessible)
+- Découverte de contenus/créateurs (onglet Discover)
 - Accès profil créateur & monétisation
 - Création/publication de contenu
 - Abonnement à un créateur
@@ -51,3 +51,4 @@ XDose combine les forces d'Instagram (social, feed, stories), des principes Appl
 ## Notes complémentaires
 - La logique de redirection post-authentification a été validée et implémentée pour garantir une expérience utilisateur moderne et engageante.
 - Le Discover/Feed général est le point d'entrée par défaut après login/signup.
+- Le feed vertical (photos, vidéos, textes) est accessible et intégré à la navigation principale, pour une expérience fluide et cohérente.

@@ -46,7 +46,7 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - [x] Création de la page Discover (Feed général)
 - [x] Intégration de Discover dans la navigation principale
 - [x] Redirection post-authentification vers Discover
-- [ ] Affichage du feed vertical (photos, vidéos, textes)
+- [x] Affichage du feed vertical (photos, vidéos, textes)
 - [ ] Interactions : like, commenter, partager, sauvegarder
 - [ ] Tap pour afficher les détails d'une publication
 - [ ] Algorithme de tri (statique pour prototype)
