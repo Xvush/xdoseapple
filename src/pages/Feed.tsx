@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import PostCard from "@/components/PostCard";
 
 const feedPosts = [
 	{
@@ -111,7 +112,7 @@ const Feed = () => {
 								className="animate-spring-in"
 								style={{ animationDelay: `${index * 150}ms` }}
 							>
-								{/* <PostCard post={post} /> */}
+								<PostCard post={post} />
 							</div>
 						))
 					)}
