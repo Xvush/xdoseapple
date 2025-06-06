@@ -1,12 +1,11 @@
-
 import { User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
-  currentView: 'feed' | 'search' | 'create' | 'profile';
-  onViewChange: (view: 'feed' | 'search' | 'create' | 'profile') => void;
+  currentView: 'feed' | 'search' | 'create' | 'profile' | 'discover';
+  onViewChange: (view: 'feed' | 'search' | 'create' | 'profile' | 'discover') => void;
 }
 
 export function Header({ currentView, onViewChange }: HeaderProps) {

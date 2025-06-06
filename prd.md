@@ -28,6 +28,7 @@ XDose combine les forces d'Instagram (social, feed, stories), des principes Appl
 
 ## 5. Parcours Utilisateurs Critiques
 - Inscription/connexion simplifiée
+- **Après authentification, l'utilisateur est automatiquement redirigé vers la page Discover (découverte/Feed général), pour maximiser l'engagement et l'exploration de la plateforme avant toute navigation ciblée.**
 - Navigation feed personnalisé
 - Découverte de contenus/créateurs
 - Accès profil créateur & monétisation
@@ -44,3 +45,9 @@ XDose combine les forces d'Instagram (social, feed, stories), des principes Appl
 ---
 
 *Ce document synthétise la vision, les fonctionnalités et les exigences UX/UI pour guider le développement du prototype XDose.*
+
+---
+
+## Notes complémentaires
+- La logique de redirection post-authentification a été validée et implémentée pour garantir une expérience utilisateur moderne et engageante.
+- Le Discover/Feed général est le point d'entrée par défaut après login/signup.

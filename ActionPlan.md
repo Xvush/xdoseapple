@@ -18,19 +18,20 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - [x] Définir les modèles dans `prisma/schema.prisma` (User, etc.)
 - [x] Générer le client Prisma et migrer la base (reset inclus)
 - [x] Implémenter les hooks et services d'authentification Prisma (hash, gestion rôle, profil creator)
-- [ ] Adapter les pages (Auth, etc.) pour utiliser Prisma
+- [x] Adapter les pages (Auth, etc.) pour utiliser Prisma
 
 ---
 
 ## 1. Authentification & Gestion Utilisateur
 
 ### 1.1. Authentification
-- [ ] Implémenter l'écran d'accueil avec options "S'inscrire" et "Se connecter"
+- [x] Implémenter l'écran d'accueil avec options "S'inscrire" et "Se connecter"
 - [x] Authentification par email/mot de passe (Prisma)
 - [ ] Authentification sociale (Apple, Google)
 - [ ] Authentification par téléphone (OTP)
 - [ ] Validation 2FA (optionnel)
 - [x] Gestion des erreurs et feedback utilisateur
+- [x] Redirection automatique vers Discover/Feed après login/signup
 
 ### 1.2. Création et gestion de profil
 - [x] Formulaire de création de profil (pseudo, avatar)
@@ -42,6 +43,9 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 ## 2. Feed & Découverte
 
 ### 2.1. Feed personnalisé
+- [x] Création de la page Discover (Feed général)
+- [x] Intégration de Discover dans la navigation principale
+- [x] Redirection post-authentification vers Discover
 - [ ] Affichage du feed vertical (photos, vidéos, textes)
 - [ ] Interactions : like, commenter, partager, sauvegarder
 - [ ] Tap pour afficher les détails d'une publication
@@ -54,7 +58,7 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - [ ] Réactions rapides (emoji, message)
 
 ### 2.3. Découverte IA
-- [ ] Page "Découvrir" avec suggestions de contenus/créateurs
+- [ ] Page "Découvrir" avec suggestions de contenus/créateurs (structure en place)
 - [ ] Recherche par mots-clés
 - [ ] Filtres et tri (catégories, tendances)
 

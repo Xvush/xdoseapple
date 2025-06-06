@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
@@ -9,8 +8,9 @@ import { CreateView } from "@/components/CreateView";
 import { ProfileView } from "@/components/ProfileView";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import Discover from "./Discover";
 
-type ViewType = 'feed' | 'search' | 'create' | 'profile';
+type ViewType = 'feed' | 'search' | 'create' | 'profile' | 'discover';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewType>('feed');
@@ -33,6 +33,8 @@ const Index = () => {
         return <CreateView />;
       case 'profile':
         return <ProfileView />;
+      case 'discover':
+        return <Discover />;
       default:
         return <FeedView />;
     }

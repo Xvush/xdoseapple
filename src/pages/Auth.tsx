@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -48,7 +47,7 @@ export default function Auth() {
             variant: "destructive",
           });
         } else {
-          navigate('/');
+          navigate('/discover');
         }
       }
     } catch (error) {

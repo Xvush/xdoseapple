@@ -1,15 +1,15 @@
-
-import { Home, Search, Plus, User } from "lucide-react";
+import { Home, Search, Plus, User, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BottomNavigationProps {
-  currentView: 'feed' | 'search' | 'create' | 'profile';
-  onViewChange: (view: 'feed' | 'search' | 'create' | 'profile') => void;
+  currentView: 'feed' | 'search' | 'create' | 'profile' | 'discover';
+  onViewChange: (view: 'feed' | 'search' | 'create' | 'profile' | 'discover') => void;
 }
 
 export function BottomNavigation({ currentView, onViewChange }: BottomNavigationProps) {
   const navItems = [
     { id: 'feed' as const, icon: Home, label: 'Feed' },
+    { id: 'discover' as const, icon: Compass, label: 'Découvrir' },
     { id: 'search' as const, icon: Search, label: 'Search' },
     { id: 'create' as const, icon: Plus, label: 'Create' },
     { id: 'profile' as const, icon: User, label: 'Profile' },
