@@ -24,7 +24,12 @@ export function BottomNavigation({ currentView, onViewChange }: BottomNavigation
               key={id}
               variant="ghost"
               size="sm"
-              onClick={() => onViewChange(id)}
+              onClick={() => {
+                if (id === 'feed') window.location.href = '/feed';
+                else if (id === 'discover') window.location.href = '/discover';
+                else if (id === 'profile') window.location.href = '/profile';
+                // Ajoute ici la navigation pour les autres onglets si besoin
+              }}
               className={`flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors ${
                 currentView === id 
                   ? 'text-black bg-gray-100' 
