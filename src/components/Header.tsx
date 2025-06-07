@@ -9,12 +9,20 @@ interface HeaderProps {
 }
 
 export function Header({ currentView, onViewChange }: HeaderProps) {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleProfileClick = () => {
+    if (user?.username) {
+      navigate(`/profile/${user.username}`);
+    } else {
+      onViewChange('profile');
+    }
   };
 
   return (
@@ -27,7 +35,7 @@ export function Header({ currentView, onViewChange }: HeaderProps) {
               variant="ghost" 
               size="sm" 
               className="rounded-full p-2"
-              onClick={() => onViewChange('profile')}
+              onClick={handleProfileClick}
             >
               <User className="w-5 h-5 text-gray-600" />
             </Button>
