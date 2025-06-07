@@ -4,54 +4,58 @@ import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Profile = () => {
-  const { username } = useParams();
+  // Use id from params (not username)
+  const { id } = useParams();
   const { user } = useAuth();
+  const [profileData, setProfileData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  // Détermine si le profil affiché est celui du user connecté
-  const isOwner = user?.username && username === user.username;
+  // Determine if the profile is the logged-in user's
+  const isOwner = user?.id && id === user.id;
 
-  // Simule une récupération de profil créateur (à remplacer par un vrai fetch si besoin)
-  // Si on visite un profil qui n'est pas le sien, on affiche un profil "public" (readonly)
-  // Pour l'instant, on utilise les mêmes données mockées
-  const profileData = isOwner
-    ? {
-        name: user?.username || "User",
-        username: user?.username || "user",
-        avatar: "/images/profile.png",
-        coverImage: "/images/profile.png",
-        bio: user?.bio || "Content creator and visual storyteller. Adding perspective to capture beauty and emotion.",
-        followers: user?.followers || "12.5K",
-        following: user?.following || "892",
-        posts: user?.posts || "156",
-        subscriptionPrice: user?.subscription_price || "9.99€/month",
-        isVerified: user?.is_verified || false,
-        role: user?.role || "viewer",
-      }
-    : {
-        name: username || "Créateur",
-        username: username || "creator",
-        avatar: "/images/profile.png",
-        coverImage: "/images/profile.png",
-        bio: "Profil public du créateur. Découvrez ses contenus premium.",
-        followers: "12.5K",
-        following: "892",
-        posts: "156",
-        subscriptionPrice: "9.99€/month",
-        isVerified: true,
-        role: "creator",
-      };
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/profile/${id}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        setProfileData(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setNotFound(true);
+        setLoading(false);
+      });
+  }, [id]);
 
-  const posts = [
-    "/lovable-uploads/7ec6a124-1c1b-4e01-80a9-cb913f60aaba.png",
-    "/lovable-uploads/d165fa45-7ad1-4879-ad72-974e27879f72.png",
-    "/lovable-uploads/99b5ec0d-8b0b-4099-b7eb-04f239fe2d31.png",
-    "/lovable-uploads/5ae50604-431b-4b7c-b9a4-ff64cfbff468.png",
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <span className="text-lg text-neutral-500">Chargement du profil...</span>
+      </div>
+    );
+  }
 
-  // Si le profil est celui d'un viewer et que ce n'est pas le sien, afficher 404
+  if (notFound || !profileData) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold mb-4">Profil introuvable</h1>
+        <p className="text-neutral-500 mb-8">Ce profil n'existe pas ou n'est pas public.</p>
+        <Button onClick={() => window.history.back()}>Retour</Button>
+      </div>
+    );
+  }
+
+  // If the profile is a viewer and not the owner, show 404
   if (profileData.role === 'viewer' && !isOwner) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -189,7 +193,7 @@ const Profile = () => {
           </div>
           {/* Posts Grid */}
           <div className="grid grid-cols-2 gap-2 pb-8">
-            {posts.map((post, index) => (
+            {profileData.posts.map((post: string, index: number) => (
               <div key={index} className="aspect-square rounded-xl overflow-hidden hover-lift">
                 <img 
                   src={post} 

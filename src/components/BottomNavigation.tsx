@@ -1,5 +1,6 @@
 import { Home, Search, Plus, User, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 interface BottomNavigationProps {
   currentView: 'feed' | 'search' | 'create' | 'profile' | 'discover';
@@ -7,6 +8,8 @@ interface BottomNavigationProps {
 }
 
 export function BottomNavigation({ currentView, onViewChange }: BottomNavigationProps) {
+  const { user } = useAuth();
+
   const navItems = [
     { id: 'feed' as const, icon: Home, label: 'Feed' },
     { id: 'discover' as const, icon: Compass, label: 'Découvrir' },
@@ -28,12 +31,10 @@ export function BottomNavigation({ currentView, onViewChange }: BottomNavigation
                 if (id === 'feed') window.location.href = '/feed';
                 else if (id === 'discover') window.location.href = '/discover';
                 else if (id === 'profile') {
-                  // Redirige dynamiquement vers le profil du user connecté
-                  const username = localStorage.getItem('xdose-username');
-                  if (username) {
-                    window.location.href = `/profile/${username}`;
+                  if (user?.id) {
+                    window.location.href = `/profile/${user.id}`;
                   } else {
-                    window.location.href = '/profile'; // fallback (peut afficher 404)
+                    window.location.href = '/profile';
                   }
                 }
                 // Ajoute ici la navigation pour les autres onglets si besoin
