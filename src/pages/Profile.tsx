@@ -9,19 +9,39 @@ const Profile = () => {
   const { username } = useParams();
   const { user } = useAuth();
 
-  const profileData = {
-    name: user?.username || "User",
-    username: user?.username || "user",
-    avatar: "/images/profile.png",
-    coverImage: "/images/profile.png",
-    bio: user?.bio || "Content creator and visual storyteller. Adding perspective to capture beauty and emotion.",
-    followers: user?.followers || "12.5K",
-    following: user?.following || "892",
-    posts: user?.posts || "156",
-    subscriptionPrice: user?.subscription_price || "9.99€/month",
-    isVerified: user?.is_verified || false,
-    role: user?.role || "viewer",
-  };
+  // Détermine si le profil affiché est celui du user connecté
+  const isOwner = user?.username && username === user.username;
+
+  // Simule une récupération de profil créateur (à remplacer par un vrai fetch si besoin)
+  // Si on visite un profil qui n'est pas le sien, on affiche un profil "public" (readonly)
+  // Pour l'instant, on utilise les mêmes données mockées
+  const profileData = isOwner
+    ? {
+        name: user?.username || "User",
+        username: user?.username || "user",
+        avatar: "/images/profile.png",
+        coverImage: "/images/profile.png",
+        bio: user?.bio || "Content creator and visual storyteller. Adding perspective to capture beauty and emotion.",
+        followers: user?.followers || "12.5K",
+        following: user?.following || "892",
+        posts: user?.posts || "156",
+        subscriptionPrice: user?.subscription_price || "9.99€/month",
+        isVerified: user?.is_verified || false,
+        role: user?.role || "viewer",
+      }
+    : {
+        name: username || "Créateur",
+        username: username || "creator",
+        avatar: "/images/profile.png",
+        coverImage: "/images/profile.png",
+        bio: "Profil public du créateur. Découvrez ses contenus premium.",
+        followers: "12.5K",
+        following: "892",
+        posts: "156",
+        subscriptionPrice: "9.99€/month",
+        isVerified: true,
+        role: "creator",
+      };
 
   const posts = [
     "/lovable-uploads/7ec6a124-1c1b-4e01-80a9-cb913f60aaba.png",
@@ -29,6 +49,17 @@ const Profile = () => {
     "/lovable-uploads/99b5ec0d-8b0b-4099-b7eb-04f239fe2d31.png",
     "/lovable-uploads/5ae50604-431b-4b7c-b9a4-ff64cfbff468.png",
   ];
+
+  // Si le profil est celui d'un viewer et que ce n'est pas le sien, afficher 404
+  if (profileData.role === 'viewer' && !isOwner) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold mb-4">Profil introuvable</h1>
+        <p className="text-neutral-500 mb-8">Ce profil n'est pas public.</p>
+        <Button onClick={() => window.history.back()}>Retour</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-20 bg-white min-h-screen">
@@ -110,6 +141,28 @@ const Profile = () => {
                 </div>
               </div>
             </>
+          )}
+          {/* Action Buttons et config uniquement pour le propriétaire creator */}
+          {isOwner && profileData.role === 'creator' && (
+            <div className="flex space-x-3 mb-8">
+              <Button className="flex-1 bg-gradient-to-r from-brand-purple-500 to-brand-teal-500 hover:from-brand-purple-600 hover:to-brand-teal-600 text-white rounded-xl font-medium">
+                Gérer mon abonnement
+              </Button>
+              <Button className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl font-medium">
+                Modifier mon profil
+              </Button>
+            </div>
+          )}
+          {/* Découverte et achat de vidéos pour tous les visiteurs sur les profils créateurs */}
+          {profileData.role === 'creator' && !isOwner && (
+            <div className="flex space-x-3 mb-8">
+              <Button className="flex-1 bg-gradient-to-r from-brand-purple-500 to-brand-teal-500 text-white rounded-xl font-medium">
+                S'abonner pour accéder au contenu premium
+              </Button>
+              <Button className="flex-1 bg-neutral-900 text-white rounded-xl font-medium">
+                Acheter une vidéo
+              </Button>
+            </div>
           )}
           {/* Content Tabs */}
           <div className="flex border-b border-neutral-200 mb-6">
