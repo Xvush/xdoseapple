@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 
 const Profile = () => {
   const { username } = useParams();
@@ -60,6 +61,12 @@ const Profile = () => {
       </div>
     );
   }
+
+  useEffect(() => {
+    if (user?.username) {
+      localStorage.setItem('xdose-username', user.username);
+    }
+  }, [user?.username]);
 
   return (
     <div className="pb-20 bg-white min-h-screen">

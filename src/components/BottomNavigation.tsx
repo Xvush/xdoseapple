@@ -27,7 +27,15 @@ export function BottomNavigation({ currentView, onViewChange }: BottomNavigation
               onClick={() => {
                 if (id === 'feed') window.location.href = '/feed';
                 else if (id === 'discover') window.location.href = '/discover';
-                else if (id === 'profile') window.location.href = '/profile';
+                else if (id === 'profile') {
+                  // Redirige dynamiquement vers le profil du user connecté
+                  const username = localStorage.getItem('xdose-username');
+                  if (username) {
+                    window.location.href = `/profile/${username}`;
+                  } else {
+                    window.location.href = '/profile'; // fallback (peut afficher 404)
+                  }
+                }
                 // Ajoute ici la navigation pour les autres onglets si besoin
               }}
               className={`flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors ${
