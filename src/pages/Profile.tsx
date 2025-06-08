@@ -5,6 +5,8 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
+import { Player, Hls, DefaultUi } from '@vime/react';
+import '@vime/core/themes/default.css';
 
 const Profile = () => {
   console.log('Profile component mounted');
@@ -239,10 +241,16 @@ const Profile = () => {
           <div className="grid grid-cols-2 gap-2 pb-8">
             {videos.map((video, index) => (
               <div key={video.id} className="aspect-square rounded-xl overflow-hidden hover-lift bg-black flex items-center justify-center">
-                {/* Mux Player embed (HLS) */}
-                <video controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} poster={video.thumbnailUrl || undefined}>
-                  <source src={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`} type="application/x-mpegURL" />
-                </video>
+                <Player
+                  theme="dark"
+                  style={{ width: '100%', height: '100%' }}
+                  controls
+                >
+                  <Hls version="latest">
+                    <source data-src={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`} type="application/x-mpegURL" />
+                  </Hls>
+                  <DefaultUi />
+                </Player>
               </div>
             ))}
             {videoFetchError && (

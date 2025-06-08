@@ -132,3 +132,34 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - [x] Loading, transitions, feedback visuel sur toutes les pages principales
 - [x] Expérience testée et validée pour créateur/viewer
 - [x] Correction des bugs de navigation, typage, et session
+
+# Action Plan XDose (Juin 2025)
+
+## ✅ Fait
+- Refactor complet backend/frontend pour modèle User unique (suppression Creator).
+- Correction du routing Vercel et des API (plus de routes dynamiques conflictuelles).
+- Migration et reset de la base Prisma, schéma User unique, Video.userId.
+- Correction de l’authentification (signup/signin) pour User unique.
+- Correction du flow d’upload vidéo :
+  - Upload Mux fonctionne pour tous les créateurs (userId).
+  - Webhook Mux crée bien la vidéo dans Prisma (userId).
+  - Les vidéos s’affichent sur le profil créateur.
+- Suppression de tous les anciens fichiers/logiciels Creator.
+- Build et déploiement validés, tests manuels OK.
+- Toutes les étapes antérieures (migration Supabase, feed, discover, etc.) sont conservées ci-dessous pour historique et traçabilité.
+
+## 🟡 À faire (prochaines étapes)
+- [ ] Ajout de la gestion du titre, description, tags, etc. lors de l’upload vidéo (frontend + backend + Prisma si besoin).
+- [ ] Améliorer le lecteur vidéo (player, UX, preview, etc.).
+- [ ] (Optionnel) Scripts d’insertion de données de test (users, vidéos).
+- [ ] (Optionnel) Rendre certains champs obligatoires dans Prisma après migration.
+- [ ] Tests finaux et QA sur l’ensemble du flow créateur.
+
+## 🟠 Prochaine priorité
+- Refactor et amélioration du lecteur vidéo (player sur le profil, UX, etc.)
+
+---
+
+**Remarque :**
+- Le flow d’upload vidéo est désormais robuste et validé.
+- La prochaine étape est l’amélioration du lecteur vidéo avant d’ajouter la gestion avancée des métadonnées vidéo.
