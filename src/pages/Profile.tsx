@@ -22,6 +22,19 @@ const Profile = () => {
   const profileId = id || user?.id;
   const isOwner = user?.id && profileId === user.id;
 
+  // Redirige automatiquement vers le profil créateur si l'utilisateur connecté est créateur et visite son profil via l'id user
+  useEffect(() => {
+    if (
+      user &&
+      user.role === 'creator' &&
+      user.creator?.id &&
+      profileId === user.id &&
+      window.location.pathname !== `/profile/${user.creator.id}`
+    ) {
+      navigate(`/profile/${user.creator.id}`, { replace: true });
+    }
+  }, [user, profileId, navigate]);
+
   useEffect(() => {
     if (!profileId) return;
     console.log('profileId used for fetch:', profileId);
