@@ -13,16 +13,16 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { creatorId } = req.body;
-    if (!creatorId) {
-      res.status(400).json({ error: 'creatorId requis' });
+    const { userId } = req.body;
+    if (!userId) {
+      res.status(400).json({ error: 'userId requis' });
       return;
     }
     // 1. Crée une URL d'upload direct Mux (signée, sécurisée)
     const upload = await mux.video.uploads.create({
       new_asset_settings: {
         playback_policy: 'public',
-        passthrough: creatorId, // On passe le creatorId à Mux
+        passthrough: userId, // On passe le userId à Mux
       },
       cors_origin: '*',
     });
