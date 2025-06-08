@@ -1,7 +1,6 @@
 // api/mux-webhook.js
 const crypto = require('crypto');
-const { PrismaClient } = require('../api/lib/prisma.js');
-const prisma = new PrismaClient();
+const prisma = require('./lib/prisma.js');
 
 // Pour la vérification du webhook secret Mux (à mettre dans .env)
 const MUX_WEBHOOK_SECRET = process.env.MUX_WEBHOOK_SECRET;
