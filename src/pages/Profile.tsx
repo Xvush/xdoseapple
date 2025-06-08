@@ -49,7 +49,9 @@ const Profile = () => {
 
   useEffect(() => {
     if (profileData && profileData.role === 'creator') {
-      fetch(`/api/profile-videos/${profileData.id}`)
+      // Utilise l'id du créateur si disponible, sinon fallback sur l'id du profil
+      const creatorId = profileData.creator?.id || profileData.id;
+      fetch(`/api/profile-videos/${creatorId}`)
         .then(async res => {
           const contentType = res.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
