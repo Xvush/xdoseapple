@@ -14,28 +14,33 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // Determine if the profile is the logged-in user's
-  const isOwner = user?.id && id === user.id;
+  // Correction: si pas d'id dans l'URL, utiliser l'id du user connecté
+  const profileId = id || user?.id;
+  const isOwner = user?.id && profileId === user.id;
 
   useEffect(() => {
-    if (!id) return;
+    if (!profileId) return;
     setLoading(true);
-    fetch(`/api/profile/${id}`)
+    fetch(`/api/profile/${profileId}`)
       .then(async (res) => {
-        if (!res.ok) {
+        console.log('API response status:', res.status);
+        const text = await res.text();
+        console.log('API response text:', text);
+        try {
+          const data = JSON.parse(text);
+          setProfileData(data);
+        } catch (e) {
+          console.error('JSON parse error:', e, text);
           setNotFound(true);
-          setLoading(false);
-          return;
         }
-        const data = await res.json();
-        setProfileData(data);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Fetch error:', err);
         setNotFound(true);
         setLoading(false);
       });
-  }, [id]);
+  }, [profileId]);
 
   if (loading) {
     return (
