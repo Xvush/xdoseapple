@@ -7,7 +7,7 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "functions": {
-    "api/**/*.ts": {
+    "api/**/*.{js,ts}": {
       "runtime": "@vercel/node@4.0.0"
     }
   }
