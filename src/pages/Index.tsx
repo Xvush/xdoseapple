@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Discover from "./Discover";
 
-type ViewType = 'feed' | 'search' | 'create' | 'profile' | 'discover';
+type ViewType = 'feed' | 'search' | 'create' | 'profile' | 'discover' | 'studio';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewType>('feed');
@@ -35,6 +35,9 @@ const Index = () => {
         return <ProfileView />;
       case 'discover':
         return <Discover />;
+      case 'studio':
+        window.location.href = '/studio';
+        return null;
       default:
         return <FeedView />;
     }
@@ -77,10 +80,13 @@ const Index = () => {
     );
   }
 
+  // For Header, fallback to 'profile' if currentView is 'studio' (Header does not support 'studio')
+  const headerView = currentView === 'studio' ? 'profile' : currentView;
+
   // Authenticated user view
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header currentView={currentView} onViewChange={setCurrentView} />
+      <Header currentView={headerView} onViewChange={setCurrentView} />
       {renderCurrentView()}
       <BottomNavigation currentView={currentView} onViewChange={setCurrentView} />
     </div>

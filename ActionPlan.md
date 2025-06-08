@@ -25,18 +25,19 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 ## 1. Authentification & Gestion Utilisateur
 
 ### 1.1. Authentification
-- [x] Implémenter l'écran d'accueil avec options "S'inscrire" et "Se connecter"
+- [x] Écran d'accueil avec options "S'inscrire" et "Se connecter"
 - [x] Authentification par email/mot de passe (Prisma)
 - [ ] Authentification sociale (Apple, Google)
 - [ ] Authentification par téléphone (OTP)
 - [ ] Validation 2FA (optionnel)
 - [x] Gestion des erreurs et feedback utilisateur
-- [x] Redirection automatique vers Discover/Feed après login/signup
+- [x] Redirection automatique Discover/Feed après login/signup
+- [x] Session persistante (localStorage, expiration auto 2h, reset sur activité)
 
 ### 1.2. Création et gestion de profil
 - [x] Formulaire de création de profil (pseudo, avatar)
 - [ ] Modification du profil utilisateur
-- [x] Gestion des types de compte (créateur, utilisateur)
+- [x] Gestion stricte des types de compte (créateur, viewer) — **Vérification frontend/backend**
 
 ---
 
@@ -57,23 +58,20 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - [ ] Affichage plein écran, barre de progression
 - [ ] Réactions rapides (emoji, message)
 
-### 2.3. Découverte IA
-- [ ] Page "Découvrir" avec suggestions de contenus/créateurs (structure en place)
-- [ ] Recherche par mots-clés
-- [ ] Filtres et tri (catégories, tendances)
-
 ---
 
 ## 3. Création & Upload de Contenu
 
 ### 3.1. Studio de création
-- [ ] Accès via bouton central "+"
-- [ ] Sélection du type de contenu (post, story, live, NFT)
-- [ ] Import/capture média (photo, vidéo)
-- [ ] Outils d'édition IA (filtres, texte, templates)
-- [ ] Mode Pro (contrôles avancés)
-- [ ] Ajout de description, hashtags, localisation
-- [ ] Prévisualisation du contenu
+- [x] Accès via bouton central "+" (visible uniquement pour créateurs)
+- [x] Accès Studio via bouton "Create" sur le profil créateur propriétaire
+- [x] Accès Studio via navigation (bottom bar) — **SPA**
+- [x] Vérification stricte du rôle (créateur/CREATOR) côté frontend
+- [x] Message d'accès refusé si non-créateur
+- [x] Loading premium (spinner, fade-in)
+- [x] Outils de création (Filtres, Texte, Musique, IA)
+- [x] Boutons d’action (Publier, Enregistrer en brouillon)
+- [x] UI premium, transitions animées
 
 ### 3.2. Upload & publication
 - [ ] Upload sécurisé des médias (images, vidéos)
@@ -83,23 +81,11 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 
 ---
 
-## 4. Monétisation
-
-### 4.1. Abonnements
-- [ ] Affichage des niveaux d'abonnement sur le profil créateur
-- [ ] Sélection et souscription à un niveau
-- [ ] Simulation du paiement (pour prototype)
-- [ ] Accès au contenu exclusif après abonnement
-
-### 4.2. Pourboires (Tips)
-- [ ] Bouton pourboire sur profil/publication
-- [ ] Choix du montant, message optionnel
-- [ ] Simulation du paiement
-
-### 4.3. Contenu PPV & NFT
-- [ ] Marquage des contenus premium (PPV, NFT)
-- [ ] Simulation d'achat/accès
-- [ ] Affichage des NFT possédés
+## 4. Navigation & SPA
+- [x] Navigation fluide (SPA) entre Feed, Discover, Profile, Studio
+- [x] BottomNavigation avec Studio visible uniquement pour créateurs
+- [x] Header adapté à chaque vue (fallback sur "profile" pour Studio)
+- [x] Correction des bugs de navigation et typage
 
 ---
 
@@ -131,17 +117,18 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 
 ---
 
-## 7. Paramètres & Bien-être Numérique
-
-### 7.1. Paramètres généraux
-- [ ] Gestion du compte, notifications, vie privée
-- [ ] Accessibilité (sous-titres, lecteurs d'écran)
-
-### 7.2. Bien-être numérique
-- [ ] Suivi du temps passé
-- [ ] Définition de limites, suggestions de pauses
-- [ ] Contrôles de contenu et anti-harcèlement
+## 7. Sécurité & Robustesse
+- [x] Vérification du rôle sur toutes les routes sensibles (Studio)
+- [x] Gestion des erreurs API et frontend
+- [x] **Compatibilité Vercel :**
+    - Suppression de tous les fichiers TypeScript dans `/api/` (Vercel ne supporte que CommonJS/JS pour les API routes).
+    - Conversion des routes API en `.js` ou `.cjs` (ex: `/api/profile-id.js`).
+    - Utilisation de `require`/`module.exports` si besoin.
+    - Ajout d'un fallback SPA dans `vercel.json` pour la navigation côté client.
 
 ---
 
-*Chaque sous-tâche peut être développée, testée et validée indépendamment pour garantir une progression claire et mesurable du projet XDose.*
+## 8. UX Premium
+- [x] Loading, transitions, feedback visuel sur toutes les pages principales
+- [x] Expérience testée et validée pour créateur/viewer
+- [x] Correction des bugs de navigation, typage, et session

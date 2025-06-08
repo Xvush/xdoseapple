@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -7,12 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 
 const Profile = () => {
+  console.log('Profile component mounted');
   // Use id from params (not username)
   const { id } = useParams();
   const { user } = useAuth();
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const navigate = useNavigate();
 
   // Correction: si pas d'id dans l'URL, utiliser l'id du user connecté
   const profileId = id || user?.id;
@@ -20,8 +22,9 @@ const Profile = () => {
 
   useEffect(() => {
     if (!profileId) return;
+    console.log('profileId used for fetch:', profileId);
     setLoading(true);
-    fetch(`/api/profile/${profileId}`)
+    fetch(`/api/profile-id?id=${profileId}`)
       .then(async (res) => {
         console.log('API response status:', res.status);
         const text = await res.text();
@@ -41,6 +44,10 @@ const Profile = () => {
         setLoading(false);
       });
   }, [profileId]);
+
+  useEffect(() => {
+    // No longer store username, only id is used for navigation
+  }, []);
 
   if (loading) {
     return (
@@ -71,12 +78,6 @@ const Profile = () => {
     );
   }
 
-  useEffect(() => {
-    if (user?.username) {
-      localStorage.setItem('xdose-username', user.username);
-    }
-  }, [user?.username]);
-
   return (
     <div className="pb-20 bg-white min-h-screen">
       <Header currentView="profile" onViewChange={() => {}} />
@@ -100,6 +101,24 @@ const Profile = () => {
               className="w-full h-full object-cover"
             />
           </div>
+          {/* Bouton Create pour le créateur propriétaire */}
+          {isOwner && profileData.role === 'creator' && (
+            <div className="flex justify-end mb-4">
+              <Button
+                className="flex items-center gap-2 px-5 py-2 rounded-xl font-medium bg-gradient-to-r from-brand-purple-500 to-brand-teal-500 hover:from-brand-purple-600 hover:to-brand-teal-600 text-white shadow-lg"
+                onClick={e => {
+                  e.preventDefault();
+                  if (isOwner && profileData.role === 'creator') {
+                    console.log('Navigating to /studio');
+                    navigate('/studio');
+                  }
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Create
+              </Button>
+            </div>
+          )}
           {/* Name and Bio */}
           <div className="mb-6">
             <div className="flex items-center space-x-2 mb-2">
@@ -198,7 +217,7 @@ const Profile = () => {
           </div>
           {/* Posts Grid */}
           <div className="grid grid-cols-2 gap-2 pb-8">
-            {profileData.posts.map((post: string, index: number) => (
+            {(Array.isArray(profileData.posts) ? profileData.posts : []).map((post: string, index: number) => (
               <div key={index} className="aspect-square rounded-xl overflow-hidden hover-lift">
                 <img 
                   src={post} 

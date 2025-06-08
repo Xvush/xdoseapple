@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import Discover from "./pages/Discover";
 import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
+import Studio from "./pages/Studio";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +26,8 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/feed" element={<Feed />} />
-            <Route path="/profile/:username" element={<Profile />} />
+            <Route path="/profile/:id" element={<Profile />} />
+            <Route path="/studio" element={<Studio />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

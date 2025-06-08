@@ -18,10 +18,10 @@ export function Header({ currentView, onViewChange }: HeaderProps) {
   };
 
   const handleProfileClick = () => {
-    if (user?.username) {
-      navigate(`/profile/${user.username}`);
+    if (user?.id) {
+      navigate(`/profile/${user.id}`);
     } else {
-      onViewChange('profile');
+      navigate('/auth');
     }
   };
 

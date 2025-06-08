@@ -16,6 +16,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  // Restore user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('xdose-user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        setSession({ user: parsed });
+      } catch {}
+    }
+  }, []);
+
   // Inscription via API
   const signUp = async (
     email: string,
@@ -39,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setUser(data.user);
       setSession({ user: data.user });
+      localStorage.setItem('xdose-user', JSON.stringify(data.user));
       setLoading(false);
       return { error: null };
     } catch (error) {
@@ -63,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setUser(data.user);
       setSession({ user: data.user });
+      localStorage.setItem('xdose-user', JSON.stringify(data.user));
       setLoading(false);
       return { error: null };
     } catch (error) {
@@ -75,7 +89,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     setUser(null);
     setSession(null);
+    localStorage.removeItem('xdose-user');
   };
+
+  // Session expiration (2 hours)
+  useEffect(() => {
+    if (!user) return;
+    const EXPIRATION_MS = 2 * 60 * 60 * 1000; // 2 hours
+    const now = Date.now();
+    let sessionStart = now;
+    try {
+      const stored = localStorage.getItem('xdose-session-start');
+      if (stored) sessionStart = parseInt(stored, 10);
+      else localStorage.setItem('xdose-session-start', String(now));
+    } catch {}
+    const timeout = setTimeout(() => {
+      setUser(null);
+      setSession(null);
+      localStorage.removeItem('xdose-user');
+      localStorage.removeItem('xdose-session-start');
+      window.location.href = '/auth';
+    }, sessionStart + EXPIRATION_MS - now);
+    // Reset session start on activity
+    const resetSession = () => {
+      localStorage.setItem('xdose-session-start', String(Date.now()));
+    };
+    window.addEventListener('click', resetSession);
+    window.addEventListener('keydown', resetSession);
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('click', resetSession);
+      window.removeEventListener('keydown', resetSession);
+    };
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>

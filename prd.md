@@ -26,29 +26,38 @@ XDose combine les forces d'Instagram (social, feed, stories), des principes Appl
 - XDose Academy (formation créateurs)
 - Paramètres avancés (bien-être numérique, accessibilité)
 
-## 5. Parcours Utilisateurs Critiques
-- Inscription/connexion simplifiée
-- **Après authentification, l'utilisateur est automatiquement redirigé vers la page Discover (découverte/Feed général), pour maximiser l'engagement et l'exploration de la plateforme avant toute navigation ciblée.**
-- Navigation feed personnalisé (onglet Feed vertical accessible)
-- Découverte de contenus/créateurs (onglet Discover)
-- Accès profil créateur & monétisation
-- Création/publication de contenu
-- Abonnement à un créateur
+## Authentification & Gestion Utilisateur
+- Authentification email/mot de passe (Prisma/PostgreSQL)
+- Gestion des rôles (créateur, viewer) — **Vérification stricte du rôle côté frontend et backend**
+- Session persistante (localStorage, expiration auto 2h, reset sur activité)
+- Redirection automatique Discover/Feed après login/signup
+- Gestion des erreurs et feedback utilisateur
 
-## 6. Critères de Succès Prototype
-- Fluidité et élégance de l’interface
-- Navigation intuitive (gestes)
-- Clarté des flux critiques
-- Adhésion à l’esthétique premium
-- Compréhension de la proposition de valeur
+## Navigation & SPA
+- Navigation fluide (SPA) entre Feed, Discover, Profile, Studio
+- BottomNavigation avec accès Studio visible uniquement pour les créateurs
+- Header et navigation adaptés à chaque vue
 
----
+## Studio de Création
+- Accès réservé aux créateurs (message d’accès si non-créateur)
+- Loading premium (spinner, fade-in)
+- Outils de création (Filtres, Texte, Musique, IA)
+- Boutons d’action (Publier, Enregistrer en brouillon)
+- UI premium, transitions animées
 
-*Ce document synthétise la vision, les fonctionnalités et les exigences UX/UI pour guider le développement du prototype XDose.*
+## Profile
+- Accès public pour les créateurs, privé pour viewers
+- Bouton "Create" visible uniquement pour le créateur propriétaire
+- Navigation cohérente vers /studio
 
----
+## Sécurité & Robustesse
+- Vérification du rôle sur toutes les routes sensibles (Studio)
+- Gestion des erreurs API et frontend
+
+## Déploiement
+- Compatible Vercel (API routes CommonJS, fallback SPA)
 
 ## Notes complémentaires
-- La logique de redirection post-authentification a été validée et implémentée pour garantir une expérience utilisateur moderne et engageante.
-- Le Discover/Feed général est le point d'entrée par défaut après login/signup.
-- Le feed vertical (photos, vidéos, textes) est accessible et intégré à la navigation principale, pour une expérience fluide et cohérente.
+- Studio et navigation SPA testés et validés (créateur/viewer)
+- Correction des bugs de navigation, typage, et session
+- UX premium sur toutes les pages principales
