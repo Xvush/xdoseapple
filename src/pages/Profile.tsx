@@ -37,24 +37,31 @@ const Profile = () => {
 
   useEffect(() => {
     if (!profileId) return;
-    console.log('profileId used for fetch:', profileId);
     setLoading(true);
     fetch(`/api/profile-id?id=${profileId}`)
       .then(async (res) => {
-        console.log('API response status:', res.status);
+        if (res.status === 404) {
+          // Fallback : tente comme id de créateur
+          return fetch(`/api/creator-id?id=${profileId}`);
+        }
+        return res;
+      })
+      .then(async (res) => {
+        if (!res || res.status === 404) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
         const text = await res.text();
-        console.log('API response text:', text);
         try {
           const data = JSON.parse(text);
           setProfileData(data);
         } catch (e) {
-          console.error('JSON parse error:', e, text);
           setNotFound(true);
         }
         setLoading(false);
       })
-      .catch((err) => {
-        console.error('Fetch error:', err);
+      .catch(() => {
         setNotFound(true);
         setLoading(false);
       });
