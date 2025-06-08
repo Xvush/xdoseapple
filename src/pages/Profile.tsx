@@ -14,6 +14,8 @@ const Profile = () => {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [videos, setVideos] = useState([]);
+  const [videoFetchError, setVideoFetchError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Correction: si pas d'id dans l'URL, utiliser l'id du user connecté
@@ -46,8 +48,28 @@ const Profile = () => {
   }, [profileId]);
 
   useEffect(() => {
-    // No longer store username, only id is used for navigation
-  }, []);
+    if (profileData && profileData.role === 'creator') {
+      fetch(`/api/profile-videos/${profileData.id}`)
+        .then(async res => {
+          const contentType = res.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await res.json();
+            setVideos(data.videos || []);
+            setVideoFetchError(null);
+          } else {
+            const text = await res.text();
+            console.error('Réponse non JSON:', text);
+            setVideos([]);
+            setVideoFetchError("Impossible de récupérer les vidéos (erreur API)");
+          }
+        })
+        .catch(err => {
+          console.error('Erreur lors du fetch des vidéos:', err);
+          setVideos([]);
+          setVideoFetchError("Impossible de récupérer les vidéos (erreur réseau)");
+        });
+    }
+  }, [profileData]);
 
   if (loading) {
     return (
@@ -217,15 +239,19 @@ const Profile = () => {
           </div>
           {/* Posts Grid */}
           <div className="grid grid-cols-2 gap-2 pb-8">
-            {(Array.isArray(profileData.posts) ? profileData.posts : []).map((post: string, index: number) => (
-              <div key={index} className="aspect-square rounded-xl overflow-hidden hover-lift">
-                <img 
-                  src={post} 
-                  alt={`Post ${index + 1}`} 
-                  className="w-full h-full object-cover"
-                />
+            {videos.map((video, index) => (
+              <div key={video.id} className="aspect-square rounded-xl overflow-hidden hover-lift bg-black flex items-center justify-center">
+                {/* Mux Player embed (HLS) */}
+                <video controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} poster={video.thumbnailUrl || undefined}>
+                  <source src={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`} type="application/x-mpegURL" />
+                </video>
               </div>
             ))}
+            {videoFetchError && (
+              <div className="col-span-2 text-center text-red-500 py-4">
+                {videoFetchError}
+              </div>
+            )}
           </div>
         </div>
       </div>
