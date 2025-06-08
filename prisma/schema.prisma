@@ -39,5 +39,21 @@ model Creator {
   socials   Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  videos    Video[]  // Ajout de la relation avec le modèle Video
   // Ajoutez ici les relations vers les contenus, abonnements, etc.
+}
+
+model Video {
+  id           String   @id @default(uuid())
+  creator      Creator  @relation(fields: [creatorId], references: [id])
+  creatorId    String
+  title        String
+  description  String?
+  muxAssetId   String   // ID Mux de l'asset vidéo
+  muxPlaybackId String  // ID Mux pour la lecture
+  status       String   // e.g. 'ready', 'processing', 'errored'
+  duration     Int?
+  thumbnailUrl String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Image, Video, Mic, Palette, Type, Music, Sparkles, Send, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,11 @@ const Studio = () => {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   useEffect(() => {
     const isCreator = user && (user.role === "creator" || user.role === "CREATOR");
@@ -24,6 +29,50 @@ const Studio = () => {
       return () => clearTimeout(timer);
     }
   }, [user, loading]);
+
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.creator?.id) return;
+    setUploading(true);
+    setUploadProgress(0);
+    setUploadError("");
+    setUploadSuccess(false);
+    try {
+      // 1. Demande une URL d'upload à l'API
+      const res = await fetch("/api/upload-video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ creatorId: user.creator.id })
+      });
+      const data = await res.json();
+      if (!data.uploadUrl) throw new Error("Erreur lors de la création de l'upload Mux");
+      // 2. Upload direct du fichier vidéo sur l'URL Mux
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", data.uploadUrl, true);
+      xhr.setRequestHeader("Content-Type", file.type);
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          setUploadProgress(Math.round((event.loaded / event.total) * 100));
+        }
+      };
+      xhr.onload = () => {
+        setUploading(false);
+        if (xhr.status === 200) {
+          setUploadSuccess(true);
+        } else {
+          setUploadError("Erreur lors de l'upload vidéo (" + xhr.status + ")");
+        }
+      };
+      xhr.onerror = () => {
+        setUploading(false);
+        setUploadError("Erreur réseau lors de l'upload vidéo");
+      };
+      xhr.send(file);
+    } catch (err) {
+      setUploading(false);
+      setUploadError(err.message || "Erreur inconnue");
+    }
+  };
 
   if (pageLoading) {
     return (
@@ -65,20 +114,38 @@ const Studio = () => {
           <h2 className="font-semibold text-neutral-800">Studio de Création</h2>
           <div />
         </div>
-        {/* Media Preview Area */}
-        <div className="card-elevated rounded-2xl h-96 flex items-center justify-center bg-neutral-100 hover-lift transition-all duration-300">
+        {/* Media Preview Area + Upload */}
+        <div className="card-elevated rounded-2xl h-96 flex flex-col items-center justify-center bg-neutral-100 hover-lift transition-all duration-300">
           <div className="text-center space-y-4">
             <div className="flex space-x-4 justify-center">
-              <Button className="apple-button-secondary rounded-xl px-6 py-3 interaction-feedback">
+              <Button className="apple-button-secondary rounded-xl px-6 py-3 interaction-feedback" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                 <Image size={20} className="mr-2" />
                 Photo
               </Button>
-              <Button className="apple-button-secondary rounded-xl px-6 py-3 interaction-feedback">
+              <Button className="apple-button-secondary rounded-xl px-6 py-3 interaction-feedback" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                 <Video size={20} className="mr-2" />
                 Vidéo
               </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={handleVideoUpload}
+                disabled={uploading}
+              />
             </div>
             <p className="text-neutral-500 text-sm">Sélectionnez ou capturez votre contenu</p>
+            {uploading && (
+              <div className="mt-4">
+                <div className="w-64 bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
+                  <div className="bg-brand-purple-500 h-3 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
+                </div>
+                <p className="text-xs text-neutral-500">Upload : {uploadProgress}%</p>
+              </div>
+            )}
+            {uploadError && <p className="text-red-500 text-sm mt-2">{uploadError}</p>}
+            {uploadSuccess && <p className="text-green-600 text-sm mt-2">Vidéo uploadée ! Traitement en cours…</p>}
           </div>
         </div>
         {/* Creation Tools */}
