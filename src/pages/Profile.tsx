@@ -5,8 +5,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { Player, Hls, DefaultUi } from '@vime/react';
-import '@vime/core/themes/default.css';
+import ReactPlayer from 'react-player';
 
 const Profile = () => {
   console.log('Profile component mounted');
@@ -241,16 +240,29 @@ const Profile = () => {
           <div className="grid grid-cols-2 gap-2 pb-8">
             {videos.map((video, index) => (
               <div key={video.id} className="aspect-square rounded-xl overflow-hidden hover-lift bg-black flex items-center justify-center">
-                <Player
-                  theme="dark"
-                  style={{ width: '100%', height: '100%' }}
+                <ReactPlayer
+                  url={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`}
                   controls
-                >
-                  <Hls version="latest">
-                    <source data-src={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`} type="application/x-mpegURL" />
-                  </Hls>
-                  <DefaultUi />
-                </Player>
+                  width="100%"
+                  height="100%"
+                  light={video.thumbnailUrl || false}
+                  pip
+                  config={{
+                    file: {
+                      attributes: {
+                        crossOrigin: 'anonymous',
+                        poster: video.thumbnailUrl || undefined,
+                      },
+                      forceHLS: true,
+                      hlsOptions: {
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                      },
+                    },
+                  }}
+                  style={{ background: '#000', borderRadius: '1rem' }}
+                  playIcon={<button className="bg-brand-purple-500 text-white rounded-full p-3 shadow-lg">▶</button>}
+                />
               </div>
             ))}
             {videoFetchError && (
