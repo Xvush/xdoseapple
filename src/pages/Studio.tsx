@@ -32,7 +32,7 @@ const Studio = () => {
 
   const handleVideoUpload = async (e) => {
     const file = e.target.files?.[0];
-    if (!file || !user?.creator?.id) return;
+    if (!file || !user?.id) return;
     setUploading(true);
     setUploadProgress(0);
     setUploadError("");
@@ -42,7 +42,7 @@ const Studio = () => {
       const res = await fetch("/api/upload-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creatorId: user.creator.id })
+        body: JSON.stringify({ userId: user.id })
       });
       const data = await res.json();
       if (!data.uploadUrl) throw new Error("Erreur lors de la création de l'upload Mux");
