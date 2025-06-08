@@ -23,19 +23,14 @@ export default async function handler(req, res) {
           email,
           password: hashed,
           role: role === 'creator' ? 'CREATOR' : 'VIEWER',
-          creator: role === 'creator' ? {
-            create: {
-              displayName: displayName || fullName,
-              avatar: avatar || null,
-            }
-          } : undefined,
-        },
-        include: { creator: true },
+          displayName: displayName || fullName || undefined,
+          avatar: avatar || undefined,
+        }
       });
       return res.status(201).json({ user });
     }
     if (action === 'signin') {
-      const user = await prisma.user.findUnique({ where: { email }, include: { creator: true } });
+      const user = await prisma.user.findUnique({ where: { email } });
       if (!user) {
         return res.status(404).json({ error: 'Utilisateur non trouvé.' });
       }
@@ -48,6 +43,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Action inconnue.' });
   } catch (error) {
     console.error('API Error:', error);
-    res.status(500).json({ error: 'Server error', details: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    res.status(500).json({ error: 'Server error', details: error?.message });
   }
 }

@@ -14,26 +14,23 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      include: { creator: true },
-    });
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
     }
     res.status(200).json({
       id: user.id,
-      name: user.creator?.displayName || user.email,
+      name: user.displayName || user.email,
       username: user.email,
-      avatar: user.creator?.avatar || '/images/profile.png',
-      coverImage: '/images/profile.png',
-      bio: user.creator?.bio || '',
-      followers: user.creator?.followers || 0,
-      following: user.creator?.following || 0,
-      posts: user.creator?.posts || 0,
-      subscriptionPrice: user.creator?.subscriptionPrice || '',
-      isVerified: user.creator?.isVerified || false,
+      avatar: user.avatar || '/images/profile.png',
+      coverImage: user.cover || '/images/profile.png',
+      bio: user.bio || '',
+      followers: user.followers || 0,
+      following: user.following || 0,
+      posts: user.posts || 0,
+      subscriptionPrice: user.subscriptionPrice || '',
+      isVerified: user.isVerified || false,
       role: user.role === 'CREATOR' ? 'creator' : 'viewer',
     });
   } catch (error) {

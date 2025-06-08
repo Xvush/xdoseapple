@@ -22,30 +22,11 @@ const Profile = () => {
   const profileId = id || user?.id;
   const isOwner = user?.id && profileId === user.id;
 
-  // Redirige automatiquement vers le profil créateur si l'utilisateur connecté est créateur et visite son profil via l'id user
-  useEffect(() => {
-    if (
-      user &&
-      user.role === 'creator' &&
-      user.creator?.id &&
-      profileId === user.id &&
-      window.location.pathname !== `/profile/${user.creator.id}`
-    ) {
-      navigate(`/profile/${user.creator.id}`, { replace: true });
-    }
-  }, [user, profileId, navigate]);
-
+  // Suppression de toute logique creator/creator.id
   useEffect(() => {
     if (!profileId) return;
     setLoading(true);
     fetch(`/api/profile-id?id=${profileId}`)
-      .then(async (res) => {
-        if (res.status === 404) {
-          // Fallback : tente comme id de créateur
-          return fetch(`/api/creator-id?id=${profileId}`);
-        }
-        return res;
-      })
       .then(async (res) => {
         if (!res || res.status === 404) {
           setNotFound(true);
@@ -69,9 +50,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (profileData && profileData.role === 'creator') {
-      // Utilise l'id du créateur si disponible, sinon fallback sur l'id du profil
-      const creatorId = profileData.creator?.id || profileData.id;
-      fetch(`/api/profile-videos/${creatorId}`)
+      fetch(`/api/getProfileVideos.js?id=${profileData.id}`)
         .then(async res => {
           const contentType = res.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
@@ -79,14 +58,11 @@ const Profile = () => {
             setVideos(data.videos || []);
             setVideoFetchError(null);
           } else {
-            const text = await res.text();
-            console.error('Réponse non JSON:', text);
             setVideos([]);
             setVideoFetchError("Impossible de récupérer les vidéos (erreur API)");
           }
         })
-        .catch(err => {
-          console.error('Erreur lors du fetch des vidéos:', err);
+        .catch(() => {
           setVideos([]);
           setVideoFetchError("Impossible de récupérer les vidéos (erreur réseau)");
         });
