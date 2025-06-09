@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, User, Video } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { XDoseLogo } from '@/components/XDoseLogo';
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -62,10 +63,12 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <XDoseLogo size="lg" animated className="mb-8" />
+      
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
           <Button
             variant="ghost"
             size="sm"
@@ -74,8 +77,8 @@ export default function Auth() {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">XDose</h1>
+          <XDoseLogo size="xl" animated className="mx-auto mb-2" />
+          {/* <h1 className="text-3xl font-bold text-gray-900 mb-2">XDose</h1> */}
           <p className="text-gray-600">
             {isSignUp ? 'Créez votre compte' : 'Connectez-vous à votre compte'}
           </p>
