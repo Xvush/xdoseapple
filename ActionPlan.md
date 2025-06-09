@@ -160,6 +160,17 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 
 ---
 
+## Améliorations du lecteur vidéo
+
+1. Contrôles personnalisés et branding
+2. Expérience utilisateur avancée (loader, seek, miniature, reprise lecture)
+3. Accessibilité et internationalisation (sous-titres, clavier, mobile)
+4. Fonctionnalités sociales et premium (partage, PiP, stats)
+5. Performance et adaptabilité (HLS/DASH, lazy loading)
+6. Sécurité et confidentialité (désactiver clic droit, masquer URL)
+
+---
+
 **Remarque :**
 - Le flow d’upload vidéo est désormais robuste et validé.
 - La prochaine étape est l’amélioration du lecteur vidéo avant d’ajouter la gestion avancée des métadonnées vidéo.
