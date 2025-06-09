@@ -189,23 +189,23 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - [ ] Option "Enregistrer en brouillon" (bonus)
 
 ### 9.2. Édition des métadonnées vidéo après publication
-- [ ] Bouton "Éditer" visible uniquement pour le créateur sur chaque vidéo de son profil
-- [ ] Modal ou page dédiée d’édition (pré-remplie avec les métadonnées actuelles)
-- [ ] Validation des champs (longueur, nombre de tags, caractères spéciaux)
-- [ ] Feedback utilisateur (toast succès/erreur, loading)
+- [x] Bouton "Éditer" visible uniquement pour le créateur sur chaque vidéo de son profil
+- [x] Modal ou page dédiée d’édition (pré-remplie avec les métadonnées actuelles)
+- [x] Validation des champs (longueur, nombre de tags, caractères spéciaux)
+- [x] Feedback utilisateur (toast succès/erreur, loading)
 - [ ] Historique des modifications (optionnel, pour audit)
 
 ### 9.3. API PATCH sécurisée pour édition vidéo
-- [ ] Route PATCH `/api/video-edit.js` (Vercel) ou `/api/videos/:id` (Express)
-- [ ] Authentification obligatoire (middleware ou vérification manuelle)
-- [ ] Vérification que l’utilisateur est bien propriétaire de la vidéo
-- [ ] Validation stricte des champs (Zod ou équivalent)
-- [ ] Mise à jour des champs modifiables (titre, description, tags) dans Prisma
-- [ ] Retourne la vidéo mise à jour
+- [x] Route PATCH `/api/video-edit.js` (Vercel) ou `/api/videos/:id` (Express)
+- [x] Authentification obligatoire (middleware ou vérification manuelle)
+- [x] Vérification que l’utilisateur est bien propriétaire de la vidéo
+- [x] Validation stricte des champs (Zod ou équivalent)
+- [x] Mise à jour des champs modifiables (titre, description, tags) dans Prisma
+- [x] Retourne la vidéo mise à jour
 
 ### 9.4. Synchronisation UI après édition
-- [ ] Rafraîchissement de la liste des vidéos sur le profil (refetch ou maj state local)
-- [ ] Affichage d’un feedback clair (succès/erreur)
+- [x] Rafraîchissement de la liste des vidéos sur le profil (refetch ou maj state local)
+- [x] Affichage d’un feedback clair (succès/erreur)
 
 ### 9.5. (Bonus) Édition inline & gestion des brouillons
 - [ ] Édition inline façon Notion (bonus V2)
