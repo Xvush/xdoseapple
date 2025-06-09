@@ -1,1 +1,1 @@
-// Fichier obsolète, supprimé suite à la refonte du modèle User/Creator.
+// Fichier supprimé (obsolète, refonte User/Creator)
