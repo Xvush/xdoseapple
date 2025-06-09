@@ -5,7 +5,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
-import ReactPlayer from 'react-player';
+import { XDoseVideoPlayer } from '@/components/XDoseVideoPlayer';
 
 const Profile = () => {
   console.log('Profile component mounted');
@@ -50,7 +50,7 @@ const Profile = () => {
   }, [profileId]);
 
   useEffect(() => {
-    if (profileData && profileData.role === 'creator') {
+    if (profileData && profileData.id) {
       fetch(`/api/profile?videos&id=${profileData.id}`)
         .then(async res => {
           const contentType = res.headers.get('content-type');
@@ -106,7 +106,7 @@ const Profile = () => {
         {/* Cover Image */}
         <div className="relative h-48 bg-gradient-to-br from-neutral-100 to-neutral-200 overflow-hidden">
           <img 
-            src={profileData.coverImage} 
+            src={profileData.cover || '/placeholder.svg'} 
             alt="Cover" 
             className="w-full h-full object-cover"
           />
@@ -117,22 +117,19 @@ const Profile = () => {
           {/* Avatar */}
           <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden mb-4 bg-white shadow-lg">
             <img 
-              src={profileData.avatar} 
-              alt={profileData.name} 
+              src={profileData.avatar || '/placeholder.svg'} 
+              alt={profileData.displayName || 'avatar'} 
               className="w-full h-full object-cover"
             />
           </div>
           {/* Bouton Create pour le créateur propriétaire */}
-          {isOwner && profileData.role === 'creator' && (
+          {isOwner && profileData.role === 'CREATOR' && (
             <div className="flex justify-end mb-4">
               <Button
                 className="flex items-center gap-2 px-5 py-2 rounded-xl font-medium bg-gradient-to-r from-brand-purple-500 to-brand-teal-500 hover:from-brand-purple-600 hover:to-brand-teal-600 text-white shadow-lg"
                 onClick={e => {
                   e.preventDefault();
-                  if (isOwner && profileData.role === 'creator') {
-                    console.log('Navigating to /studio');
-                    navigate('/studio');
-                  }
+                  navigate('/studio');
                 }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -143,14 +140,14 @@ const Profile = () => {
           {/* Name and Bio */}
           <div className="mb-6">
             <div className="flex items-center space-x-2 mb-2">
-              <h1 className="text-2xl font-bold text-neutral-900">{profileData.name}</h1>
+              <h1 className="text-2xl font-bold text-neutral-900">{profileData.displayName}</h1>
               {profileData.isVerified && (
                 <div className="w-5 h-5 bg-brand-purple-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-xs">✓</span>
                 </div>
               )}
               <span className="text-xs px-2 py-1 bg-brand-purple-100 text-brand-purple-700 rounded-full capitalize">
-                {profileData.role}
+                {profileData.role?.toLowerCase()}
               </span>
             </div>
             <p className="text-neutral-700 text-balance leading-relaxed mb-4">
@@ -173,7 +170,7 @@ const Profile = () => {
             </div>
           </div>
           {/* Action Buttons */}
-          {profileData.role === 'creator' && (
+          {profileData.role === 'CREATOR' && (
             <>
               <div className="flex space-x-3 mb-8">
                 <Button className="flex-1 bg-gradient-to-r from-brand-purple-500 to-brand-teal-500 hover:from-brand-purple-600 hover:to-brand-teal-600 text-white rounded-xl font-medium">
@@ -199,7 +196,7 @@ const Profile = () => {
             </>
           )}
           {/* Action Buttons et config uniquement pour le propriétaire creator */}
-          {isOwner && profileData.role === 'creator' && (
+          {isOwner && profileData.role === 'CREATOR' && (
             <div className="flex space-x-3 mb-8">
               <Button className="flex-1 bg-gradient-to-r from-brand-purple-500 to-brand-teal-500 hover:from-brand-purple-600 hover:to-brand-teal-600 text-white rounded-xl font-medium">
                 Gérer mon abonnement
@@ -210,7 +207,7 @@ const Profile = () => {
             </div>
           )}
           {/* Découverte et achat de vidéos pour tous les visiteurs sur les profils créateurs */}
-          {profileData.role === 'creator' && !isOwner && (
+          {profileData.role === 'CREATOR' && !isOwner && (
             <div className="flex space-x-3 mb-8">
               <Button className="flex-1 bg-gradient-to-r from-brand-purple-500 to-brand-teal-500 text-white rounded-xl font-medium">
                 S'abonner pour accéder au contenu premium
@@ -225,7 +222,7 @@ const Profile = () => {
             <button className="flex-1 py-3 text-sm font-medium text-brand-purple-600 border-b-2 border-brand-purple-600">
               Posts
             </button>
-            {profileData.role === 'creator' && (
+            {profileData.role === 'CREATOR' && (
               <>
                 <button className="flex-1 py-3 text-sm font-medium text-neutral-500">
                   Premium
@@ -240,28 +237,10 @@ const Profile = () => {
           <div className="grid grid-cols-2 gap-2 pb-8">
             {videos.map((video, index) => (
               <div key={video.id} className="aspect-square rounded-xl overflow-hidden hover-lift bg-black flex items-center justify-center">
-                <ReactPlayer
+                <XDoseVideoPlayer
                   url={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`}
-                  controls
-                  width="100%"
-                  height="100%"
-                  light={video.thumbnailUrl || false}
-                  pip
-                  config={{
-                    file: {
-                      attributes: {
-                        crossOrigin: 'anonymous',
-                        poster: video.thumbnailUrl || undefined,
-                      },
-                      forceHLS: true,
-                      hlsOptions: {
-                        enableWorker: true,
-                        lowLatencyMode: true,
-                      },
-                    },
-                  }}
-                  style={{ background: '#000', borderRadius: '1rem' }}
-                  playIcon={<button className="bg-brand-purple-500 text-white rounded-full p-3 shadow-lg">▶</button>}
+                  poster={video.thumbnailUrl || undefined}
+                  title={video.title}
                 />
               </div>
             ))}

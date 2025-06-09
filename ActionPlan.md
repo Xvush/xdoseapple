@@ -162,12 +162,21 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 
 ## Améliorations du lecteur vidéo
 
-1. Contrôles personnalisés et branding
-2. Expérience utilisateur avancée (loader, seek, miniature, reprise lecture)
-3. Accessibilité et internationalisation (sous-titres, clavier, mobile)
-4. Fonctionnalités sociales et premium (partage, PiP, stats)
-5. Performance et adaptabilité (HLS/DASH, lazy loading)
-6. Sécurité et confidentialité (désactiver clic droit, masquer URL)
+- [x] 1. Contrôles personnalisés et branding
+  - Création du composant XDoseVideoPlayer réutilisable (branding, overlay logo, titre)
+  - Contrôles custom premium (play/pause, volume, mute, seek, fullscreen)
+  - Style responsive, ergonomie mobile, boutons adaptés
+  - Logo XDose discret et non envahissant
+- [x] 2. Expérience utilisateur avancée (loader, seek, miniature, reprise lecture)
+  - Loader animé pendant le buffering
+  - Miniature (poster) avant lecture avec bouton play premium
+  - Reprise de lecture automatique (timestamp sauvegardé par vidéo)
+  - Lecture auto en plein écran au démarrage
+  - Affichage fluide, UX premium sur mobile et desktop
+- [ ] 3. Accessibilité et internationalisation (sous-titres, clavier, mobile)
+- [ ] 4. Fonctionnalités sociales et premium (partage, PiP, stats)
+- [ ] 5. Performance et adaptabilité (HLS/DASH, lazy loading)
+- [ ] 6. Sécurité et confidentialité (désactiver clic droit, masquer URL)
 
 ---
 
