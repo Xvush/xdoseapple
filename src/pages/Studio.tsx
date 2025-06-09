@@ -275,8 +275,8 @@ const Studio = () => {
                 )}
               </div>
               <div className="flex gap-2 mt-4">
-                <Button className="flex-1 apple-button-secondary rounded-xl" onClick={handleBack} disabled={uploading}>Retour</Button>
-                <Button className="flex-1 bg-brand-purple-600 text-white rounded-xl" onClick={handlePublish} disabled={uploading}>
+                <Button className="flex-1 rounded-xl border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100 transition-colors" onClick={handleBack} disabled={uploading}>Retour</Button>
+                <Button className="flex-1 rounded-xl bg-brand-purple-600 text-white hover:bg-brand-purple-700 transition-colors font-semibold shadow-lg" onClick={handlePublish} disabled={uploading}>
                   {uploading ? 'Publication…' : 'Publier'}
                 </Button>
               </div>
