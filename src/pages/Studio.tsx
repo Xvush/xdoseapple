@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Image, Video, Mic, Palette, Type, Music, Sparkles, Send, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, Image, Video, Mic, Palette, Type, Music, Sparkles, Send, AlertTriangle, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -19,7 +19,15 @@ const Studio = () => {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [videoTitle, setVideoTitle] = useState("");
   const [videoDescription, setVideoDescription] = useState("");
-  const [videoTags, setVideoTags] = useState(""); // tags séparés par virgule
+  const [tags, setTags] = useState([]); // tags séparés par virgule
+
+  // Wizard d’upload vidéo (UX premium)
+  const [wizardStep, setWizardStep] = useState(1);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>("");
+
+  // Validation pour activer le bouton "Suivant"
+  const isStep1Valid = videoFile && videoTitle.trim().length > 0 && tags.length > 0;
 
   useEffect(() => {
     const isCreator = user && (user.role === "creator" || user.role === "CREATOR");
@@ -33,9 +41,20 @@ const Studio = () => {
     }
   }, [user, loading]);
 
-  const handleVideoUpload = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (!file || !user?.id) return;
+    if (file) {
+      setVideoFile(file);
+      // Générer un thumbnail preview (optionnel, ici via URL.createObjectURL)
+      setThumbnailUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleNext = () => setWizardStep(2);
+  const handleBack = () => setWizardStep(1);
+
+  const handlePublish = async () => {
+    if (!videoFile || !user?.id) return;
     setUploading(true);
     setUploadProgress(0);
     setUploadError("");
@@ -49,7 +68,7 @@ const Studio = () => {
           userId: user.id,
           title: videoTitle,
           description: videoDescription,
-          tags: videoTags.split(",").map(t => t.trim()).filter(Boolean)
+          tags: tags
         })
       });
       const data = await res.json();
@@ -57,7 +76,7 @@ const Studio = () => {
       // 2. Upload direct du fichier vidéo sur l'URL Mux
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", data.uploadUrl, true);
-      xhr.setRequestHeader("Content-Type", file.type);
+      xhr.setRequestHeader("Content-Type", videoFile.type);
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
           setUploadProgress(Math.round((event.loaded / event.total) * 100));
@@ -67,6 +86,12 @@ const Studio = () => {
         setUploading(false);
         if (xhr.status === 200) {
           setUploadSuccess(true);
+          setWizardStep(1); // Reset wizard
+          setVideoFile(null);
+          setThumbnailUrl("");
+          setVideoTitle("");
+          setVideoDescription("");
+          setTags([]);
         } else {
           setUploadError("Erreur lors de l'upload vidéo (" + xhr.status + ")");
         }
@@ -75,7 +100,7 @@ const Studio = () => {
         setUploading(false);
         setUploadError("Erreur réseau lors de l'upload vidéo");
       };
-      xhr.send(file);
+      xhr.send(videoFile);
     } catch (err) {
       setUploading(false);
       setUploadError(err.message || "Erreur inconnue");
@@ -111,6 +136,59 @@ const Studio = () => {
     { icon: Sparkles, label: "IA", id: "ai", color: "bg-purple-500" },
   ];
 
+  const MAX_TAGS = 5;
+
+  function TagInput({ tags, setTags, disabled }) {
+    const [input, setInput] = useState("");
+    const inputRef = useRef(null);
+    const addTag = (tag) => {
+      const clean = tag.trim().toLowerCase();
+      if (!clean || tags.includes(clean) || tags.length >= MAX_TAGS || clean.length > 20) return;
+      setTags([...tags, clean]);
+      setInput("");
+    };
+    const removeTag = (tag) => setTags(tags.filter(t => t !== tag));
+    const onInput = (e) => setInput(e.target.value);
+    const onKeyDown = (e) => {
+      if ((e.key === "Enter" || e.key === ",") && input.trim()) {
+        e.preventDefault();
+        addTag(input);
+      } else if (e.key === "Backspace" && !input && tags.length) {
+        removeTag(tags[tags.length - 1]);
+      }
+    };
+    return (
+      <div className="w-full">
+        <div className="flex flex-wrap gap-1 mb-1">
+          {tags.map((tag, i) => (
+            <span key={i} className="inline-flex items-center bg-brand-purple-100 text-brand-purple-700 text-xs px-2 py-0.5 rounded-full">
+              #{tag}
+              {!disabled && (
+                <button type="button" className="ml-1 focus:outline-none" onClick={() => removeTag(tag)}>
+                  <X size={14} />
+                </button>
+              )}
+            </span>
+          ))}
+        </div>
+        <input
+          ref={inputRef}
+          className="input w-full rounded border px-3 py-2 text-base"
+          type="text"
+          placeholder={tags.length >= MAX_TAGS ? "Limite de tags atteinte" : "Ajouter un tag (Entrée ou ,)"}
+          value={input}
+          onChange={onInput}
+          onKeyDown={onKeyDown}
+          maxLength={20}
+          disabled={disabled || tags.length >= MAX_TAGS}
+        />
+        {tags.length >= MAX_TAGS && (
+          <div className="text-xs text-neutral-400 mt-1">Maximum {MAX_TAGS} tags</div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 pb-20 pt-20">
       <Header currentView="profile" onViewChange={() => {}} />
@@ -123,12 +201,26 @@ const Studio = () => {
           <div />
         </div>
         {/* Media Preview Area + Upload */}
-        <div className="card-elevated rounded-2xl h-96 flex flex-col items-center justify-center bg-neutral-100 hover-lift transition-all duration-300">
-          <div className="text-center space-y-4">
-            {/* Champs métadonnées vidéo */}
-            <div className="space-y-2 mb-4">
+        {wizardStep === 1 && (
+          <div className="card-elevated rounded-2xl h-96 flex flex-col items-center justify-center bg-neutral-100 hover-lift transition-all duration-300">
+            <div className="text-center space-y-4 w-full max-w-xs mx-auto">
               <input
-                className="input w-full rounded border px-3 py-2 text-base"
+                ref={fileInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={uploading}
+              />
+              <Button className="apple-button-secondary rounded-xl px-6 py-3 interaction-feedback w-full" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                <Video size={20} className="mr-2" />
+                Sélectionner une vidéo
+              </Button>
+              {videoFile && (
+                <video src={thumbnailUrl} controls className="w-full rounded-xl mt-2" style={{ maxHeight: 160 }} />
+              )}
+              <input
+                className="input w-full rounded border px-3 py-2 text-base mt-2"
                 type="text"
                 placeholder="Titre de la vidéo"
                 value={videoTitle}
@@ -145,47 +237,50 @@ const Studio = () => {
                 rows={2}
                 disabled={uploading}
               />
-              <input
-                className="input w-full rounded border px-3 py-2 text-base"
-                type="text"
-                placeholder="Tags (séparés par des virgules, max 5)"
-                value={videoTags}
-                onChange={e => setVideoTags(e.target.value)}
-                maxLength={100}
-                disabled={uploading}
-              />
-            </div>
-            <div className="flex space-x-4 justify-center">
-              <Button className="apple-button-secondary rounded-xl px-6 py-3 interaction-feedback" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                <Image size={20} className="mr-2" />
-                Photo
+              <TagInput tags={tags} setTags={setTags} disabled={uploading} />
+              <Button className="w-full bg-brand-purple-600 text-white rounded-xl mt-4" onClick={handleNext} disabled={!isStep1Valid || uploading}>
+                Suivant
               </Button>
-              <Button className="apple-button-secondary rounded-xl px-6 py-3 interaction-feedback" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                <Video size={20} className="mr-2" />
-                Vidéo
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="video/*"
-                className="hidden"
-                onChange={handleVideoUpload}
-                disabled={uploading}
-              />
             </div>
-            <p className="text-neutral-500 text-sm">Sélectionnez ou capturez votre contenu</p>
-            {uploading && (
-              <div className="mt-4">
-                <div className="w-64 bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
-                  <div className="bg-brand-purple-500 h-3 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
-                </div>
-                <p className="text-xs text-neutral-500">Upload : {uploadProgress}%</p>
-              </div>
-            )}
-            {uploadError && <p className="text-red-500 text-sm mt-2">{uploadError}</p>}
-            {uploadSuccess && <p className="text-green-600 text-sm mt-2">Vidéo uploadée ! Traitement en cours…</p>}
           </div>
-        </div>
+        )}
+        {wizardStep === 2 && (
+          <div className="card-elevated rounded-2xl h-96 flex flex-col items-center justify-center bg-neutral-100 hover-lift transition-all duration-300">
+            <div className="text-center space-y-4 w-full max-w-xs mx-auto">
+              <h3 className="font-semibold text-neutral-800">Récapitulatif</h3>
+              {videoFile && (
+                <video src={thumbnailUrl} controls className="w-full rounded-xl" style={{ maxHeight: 160 }} />
+              )}
+              <div className="text-left mt-2">
+                <div className="font-semibold text-sm text-neutral-900 truncate">{videoTitle}</div>
+                {videoDescription && <div className="text-xs text-neutral-500 truncate">{videoDescription}</div>}
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {tags.map((tag, i) => (
+                      <span key={i} className="inline-block bg-brand-purple-100 text-brand-purple-700 text-xs px-2 py-0.5 rounded-full">#{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Button className="flex-1 apple-button-secondary rounded-xl" onClick={handleBack} disabled={uploading}>Retour</Button>
+                <Button className="flex-1 bg-brand-purple-600 text-white rounded-xl" onClick={handlePublish} disabled={uploading}>
+                  {uploading ? 'Publication…' : 'Publier'}
+                </Button>
+              </div>
+              {uploadError && <div className="text-red-500 text-sm mt-2">{uploadError}</div>}
+              {uploadSuccess && <div className="text-green-600 text-sm mt-2">Vidéo uploadée ! Traitement en cours…</div>}
+              {uploading && (
+                <div className="mt-2">
+                  <div className="w-64 bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
+                    <div className="bg-brand-purple-500 h-3 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
+                  </div>
+                  <p className="text-xs text-neutral-500">Upload : {uploadProgress}%</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {/* Creation Tools */}
         <div className="space-y-4">
           <h3 className="font-medium text-neutral-700">Outils de création</h3>
