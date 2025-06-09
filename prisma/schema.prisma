@@ -50,6 +50,7 @@ model Video {
   status       String
   duration     Int?
   thumbnailUrl String?
+  tags         String[] // Liste de tags pour la recherche/filtrage
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

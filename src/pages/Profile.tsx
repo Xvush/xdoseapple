@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { XDoseVideoPlayer } from '@/components/XDoseVideoPlayer';
+import { EditVideoModal } from '@/components/EditVideoModal';
 
 const Profile = () => {
   console.log('Profile component mounted');
@@ -17,6 +18,7 @@ const Profile = () => {
   const [notFound, setNotFound] = useState(false);
   const [videos, setVideos] = useState([]);
   const [videoFetchError, setVideoFetchError] = useState<string | null>(null);
+  const [editingVideo, setEditingVideo] = useState(null);
   const navigate = useNavigate();
 
   // Correction: si pas d'id dans l'URL, utiliser l'id du user connecté
@@ -69,6 +71,8 @@ const Profile = () => {
         });
     }
   }, [profileData]);
+
+  const handleEditVideo = (video) => setEditingVideo(video);
 
   if (loading) {
     return (
@@ -236,12 +240,36 @@ const Profile = () => {
           {/* Posts Grid */}
           <div className="grid grid-cols-2 gap-2 pb-8">
             {videos.map((video, index) => (
-              <div key={video.id} className="aspect-square rounded-xl overflow-hidden hover-lift bg-black flex items-center justify-center">
+              <div key={video.id} className="aspect-square rounded-xl overflow-hidden hover-lift bg-black flex flex-col items-center justify-center p-2 relative group">
                 <XDoseVideoPlayer
                   url={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`}
                   poster={video.thumbnailUrl || undefined}
                   title={video.title}
                 />
+                {/* Métadonnées vidéo */}
+                <div className="w-full mt-2 text-left">
+                  <div className="font-semibold text-sm text-neutral-900 truncate" title={video.title}>{video.title}</div>
+                  {video.description && (
+                    <div className="text-xs text-neutral-500 truncate" title={video.description}>{video.description}</div>
+                  )}
+                  {Array.isArray(video.tags) && video.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {video.tags.map((tag, i) => (
+                        <span key={i} className="inline-block bg-brand-purple-100 text-brand-purple-700 text-xs px-2 py-0.5 rounded-full">#{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {/* Bouton Editer pour le créateur propriétaire */}
+                {isOwner && profileData.role === 'CREATOR' && (
+                  <button
+                    className="absolute top-2 right-2 bg-white/80 hover:bg-brand-purple-100 text-brand-purple-700 rounded-full p-2 shadow transition-opacity opacity-0 group-hover:opacity-100"
+                    onClick={() => handleEditVideo(video)}
+                    title="Éditer la vidéo"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13h3l8-8a2.828 2.828 0 00-4-4l-8 8v3zm0 0v3h3" /></svg>
+                  </button>
+                )}
               </div>
             ))}
             {videoFetchError && (
@@ -253,6 +281,17 @@ const Profile = () => {
         </div>
       </div>
       <BottomNavigation currentView="profile" onViewChange={() => {}} />
+      {editingVideo && (
+        <EditVideoModal
+          video={editingVideo}
+          onClose={() => setEditingVideo(null)}
+          onUpdate={updated => {
+            setVideos(videos => videos.map(v => v.id === updated.id ? updated : v));
+            setEditingVideo(null);
+          }}
+          userId={user?.id}
+        />
+      )}
     </div>
   );
 };

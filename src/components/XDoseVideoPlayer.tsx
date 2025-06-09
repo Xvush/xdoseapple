@@ -54,18 +54,80 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
   const handleBuffer = () => setBuffering(true);
   const handleBufferEnd = () => setBuffering(false);
 
-  // Lecture auto en plein écran au démarrage
+  // Gestion de l'affichage des contrôles (auto-hide en plein écran uniquement)
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeout = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Affiche les contrôles au moindre mouvement/tap, puis les masque après 2s (en plein écran uniquement)
+  const handleUserActivity = () => {
+    setShowControls(true);
+    if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    if (document.fullscreenElement === containerRef.current) {
+      controlsTimeout.current = setTimeout(() => setShowControls(false), 2000);
+    }
+  };
+
+  // Plein écran sur le conteneur principal
   const handleStartAndFullscreen = () => {
     setHasStarted(true);
     setPlaying(true);
     setTimeout(() => {
-      const el = playerRef.current?.getInternalPlayer()?.parentElement;
-      if (el && el.requestFullscreen) el.requestFullscreen();
-    }, 100); // Laisse le temps au player de s'afficher
+      const el = containerRef.current;
+      if (el) requestFullscreenCompat(el);
+    }, 100);
   };
 
+  // Réaffiche les contrôles en sortant du plein écran
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setShowControls(true);
+      if (document.fullscreenElement !== containerRef.current && controlsTimeout.current) {
+        clearTimeout(controlsTimeout.current);
+      }
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, []);
+
+  // Ajoute listeners pour détecter activité utilisateur sur le conteneur
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener('mousemove', handleUserActivity);
+    el.addEventListener('touchstart', handleUserActivity);
+    return () => {
+      el.removeEventListener('mousemove', handleUserActivity);
+      el.removeEventListener('touchstart', handleUserActivity);
+    };
+  }, [hasStarted]);
+
+  // Fonction utilitaire pour demander le plein écran compatible navigateurs
+  function requestFullscreenCompat(el: HTMLElement) {
+    if (el.requestFullscreen) return el.requestFullscreen();
+    // @ts-ignore
+    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+    // @ts-ignore
+    if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
+    // @ts-ignore
+    if (el.msRequestFullscreen) return el.msRequestFullscreen();
+  }
+
+  // Lazy loading du player (IntersectionObserver)
+  const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new window.IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden group">
+    <div ref={containerRef} className="relative w-full aspect-video bg-black rounded-xl overflow-hidden group select-none">
       {/* Overlay branding */}
       <div className="absolute top-1 left-1 z-20 flex items-center gap-1 pointer-events-none">
         <XDoseLogo size="sm" animated className="!text-base" />
@@ -89,27 +151,40 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
           </span>
         </button>
       )}
-      {/* Player */}
-      <ReactPlayer
-        ref={playerRef}
-        url={url}
-        playing={playing}
-        muted={muted}
-        volume={volume}
-        width="100%"
-        height="100%"
-        light={false}
-        controls={false}
-        onProgress={handleProgress}
-        onBuffer={handleBuffer}
-        onBufferEnd={handleBufferEnd}
-        onPlay={() => setHasStarted(true)}
-        onPause={() => setPlaying(false)}
-        style={{ background: '#000' }}
-        config={{ file: { attributes: { poster: poster || undefined } } }}
-      />
+      {/* Player (lazy loaded) */}
+      {isVisible && (
+        <ReactPlayer
+          ref={playerRef}
+          url={url}
+          playing={playing}
+          muted={muted}
+          volume={volume}
+          width="100%"
+          height="100%"
+          light={false}
+          controls={false}
+          onProgress={handleProgress}
+          onBuffer={handleBuffer}
+          onBufferEnd={handleBufferEnd}
+          onPlay={() => setHasStarted(true)}
+          onPause={() => setPlaying(false)}
+          style={{ background: '#000' }}
+          config={{
+            file: {
+              attributes: { poster: poster || undefined },
+              forceHLS: true,
+              hlsOptions: {
+                enableWorker: true,
+                lowLatencyMode: true,
+                maxBufferLength: 30,
+                maxMaxBufferLength: 60,
+              },
+            },
+          }}
+        />
+      )}
       {/* Custom Controls */}
-      {hasStarted && (
+      {(showControls || document.fullscreenElement !== containerRef.current) && (
         <div className="absolute bottom-0 left-0 right-0 z-20 p-2 bg-gradient-to-t from-black/80 to-transparent flex flex-col gap-1 opacity-100 transition">
           {/* Progress bar */}
           <input

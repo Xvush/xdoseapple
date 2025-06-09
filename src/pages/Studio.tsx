@@ -17,6 +17,9 @@ const Studio = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [videoTitle, setVideoTitle] = useState("");
+  const [videoDescription, setVideoDescription] = useState("");
+  const [videoTags, setVideoTags] = useState(""); // tags séparés par virgule
 
   useEffect(() => {
     const isCreator = user && (user.role === "creator" || user.role === "CREATOR");
@@ -42,7 +45,12 @@ const Studio = () => {
       const res = await fetch("/api/upload-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id })
+        body: JSON.stringify({
+          userId: user.id,
+          title: videoTitle,
+          description: videoDescription,
+          tags: videoTags.split(",").map(t => t.trim()).filter(Boolean)
+        })
       });
       const data = await res.json();
       if (!data.uploadUrl) throw new Error("Erreur lors de la création de l'upload Mux");
@@ -117,6 +125,36 @@ const Studio = () => {
         {/* Media Preview Area + Upload */}
         <div className="card-elevated rounded-2xl h-96 flex flex-col items-center justify-center bg-neutral-100 hover-lift transition-all duration-300">
           <div className="text-center space-y-4">
+            {/* Champs métadonnées vidéo */}
+            <div className="space-y-2 mb-4">
+              <input
+                className="input w-full rounded border px-3 py-2 text-base"
+                type="text"
+                placeholder="Titre de la vidéo"
+                value={videoTitle}
+                onChange={e => setVideoTitle(e.target.value)}
+                maxLength={80}
+                disabled={uploading}
+              />
+              <textarea
+                className="input w-full rounded border px-3 py-2 text-base"
+                placeholder="Description (optionnelle)"
+                value={videoDescription}
+                onChange={e => setVideoDescription(e.target.value)}
+                maxLength={500}
+                rows={2}
+                disabled={uploading}
+              />
+              <input
+                className="input w-full rounded border px-3 py-2 text-base"
+                type="text"
+                placeholder="Tags (séparés par des virgules, max 5)"
+                value={videoTags}
+                onChange={e => setVideoTags(e.target.value)}
+                maxLength={100}
+                disabled={uploading}
+              />
+            </div>
             <div className="flex space-x-4 justify-center">
               <Button className="apple-button-secondary rounded-xl px-6 py-3 interaction-feedback" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                 <Image size={20} className="mr-2" />

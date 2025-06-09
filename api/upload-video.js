@@ -13,16 +13,24 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { userId } = req.body;
+    const { userId, title, description, tags } = req.body;
     if (!userId) {
       res.status(400).json({ error: 'userId requis' });
       return;
+    }
+    // Validation/normalisation des tags (tableau de chaînes, max 5, trim)
+    let safeTags = [];
+    if (Array.isArray(tags)) {
+      safeTags = tags
+        .map(t => (typeof t === 'string' ? t.trim().toLowerCase() : null))
+        .filter(Boolean)
+        .slice(0, 5);
     }
     // 1. Crée une URL d'upload direct Mux (signée, sécurisée)
     const upload = await mux.video.uploads.create({
       new_asset_settings: {
         playback_policy: 'public',
-        passthrough: userId, // On passe le userId à Mux
+        passthrough: JSON.stringify({ userId, title, description, tags: safeTags }),
       },
       cors_origin: '*',
     });

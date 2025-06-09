@@ -38,8 +38,14 @@ module.exports = async (req, res) => {
   // Gestion des events Mux
   if (event.type === 'video.asset.ready') {
     const asset = event.data;
-    // On récupère le userId depuis asset.passthrough (envoyé lors de l'upload)
-    const userId = asset.passthrough;
+    // On récupère les métadonnées depuis passthrough (JSON string)
+    let passthrough = {};
+    try {
+      passthrough = JSON.parse(asset.passthrough);
+    } catch (e) {
+      passthrough = { userId: asset.passthrough };
+    }
+    const { userId, title, description, tags } = passthrough;
     if (!userId) {
       console.error('Passthrough (userId) manquant dans l’event Mux');
       res.status(400).json({ error: 'userId manquant dans passthrough' });
@@ -48,7 +54,9 @@ module.exports = async (req, res) => {
     await prisma.video.create({
       data: {
         userId,
-        title: 'Vidéo sans titre', // À améliorer côté frontend
+        title: title || 'Vidéo sans titre',
+        description: description || null,
+        tags: Array.isArray(tags) ? tags : [],
         muxAssetId: asset.id,
         muxPlaybackId: asset.playback_ids[0]?.id || '',
         status: 'ready',

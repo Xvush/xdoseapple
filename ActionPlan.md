@@ -175,11 +175,50 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
   - Affichage fluide, UX premium sur mobile et desktop
 - [ ] 3. Accessibilité et internationalisation (sous-titres, clavier, mobile)
 - [ ] 4. Fonctionnalités sociales et premium (partage, PiP, stats)
-- [ ] 5. Performance et adaptabilité (HLS/DASH, lazy loading)
+- [X] 5. Performance et adaptabilité (HLS/DASH, lazy loading)
 - [ ] 6. Sécurité et confidentialité (désactiver clic droit, masquer URL)
 
 ---
 
-**Remarque :**
-- Le flow d’upload vidéo est désormais robuste et validé.
-- La prochaine étape est l’amélioration du lecteur vidéo avant d’ajouter la gestion avancée des métadonnées vidéo.
+## 9. Gestion avancée de l’édition vidéo (post-publication)
+
+### 9.1. Wizard d’upload vidéo (UX premium)
+- [ ] Étape 1 : Formulaire enrichi (titre, description, tags, preview thumbnail)
+- [ ] Étape 2 : Récapitulatif avant publication (aperçu miniature, titre, tags, bouton "Publier")
+- [ ] Possibilité de revenir en arrière avant validation
+- [ ] Option "Enregistrer en brouillon" (bonus)
+
+### 9.2. Édition des métadonnées vidéo après publication
+- [ ] Bouton "Éditer" visible uniquement pour le créateur sur chaque vidéo de son profil
+- [ ] Modal ou page dédiée d’édition (pré-remplie avec les métadonnées actuelles)
+- [ ] Validation des champs (longueur, nombre de tags, caractères spéciaux)
+- [ ] Feedback utilisateur (toast succès/erreur, loading)
+- [ ] Historique des modifications (optionnel, pour audit)
+
+### 9.3. API PATCH sécurisée pour édition vidéo
+- [ ] Route PATCH `/api/video-edit.js` (Vercel) ou `/api/videos/:id` (Express)
+- [ ] Authentification obligatoire (middleware ou vérification manuelle)
+- [ ] Vérification que l’utilisateur est bien propriétaire de la vidéo
+- [ ] Validation stricte des champs (Zod ou équivalent)
+- [ ] Mise à jour des champs modifiables (titre, description, tags) dans Prisma
+- [ ] Retourne la vidéo mise à jour
+
+### 9.4. Synchronisation UI après édition
+- [ ] Rafraîchissement de la liste des vidéos sur le profil (refetch ou maj state local)
+- [ ] Affichage d’un feedback clair (succès/erreur)
+
+### 9.5. (Bonus) Édition inline & gestion des brouillons
+- [ ] Édition inline façon Notion (bonus V2)
+- [ ] Gestion des brouillons (statut, publication différée)
+
+---
+
+**Résumé du flow**
+1. Upload vidéo : wizard 2 étapes, confirmation avant publication.
+2. Après publication : bouton "Éditer" → modal/page → PATCH API → feedback → mise à jour UI.
+3. Sécurité : auth, validation, autorisation propriétaire, feedback UX.
+4. (Optionnel) Historique des modifications et gestion des brouillons.
+
+---
+
+**Prochaine étape** : commencer par la création de la route PATCH `/api/video-edit.js` (Vercel/Express compatible, validation Zod, auth, vérification propriétaire).
