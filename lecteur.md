@@ -31,13 +31,22 @@
 - Préloader circulaire customisé
 - Gestion HLS pour mobile
 
+### 4. Accessibilité & Ergonomie
+- Focus clavier et navigation ARIA sur tous les contrôles
+- Contrastes vérifiés (boutons, textes, barres)
+- Contrôles utilisables au doigt et au clavier
+- Annonces ARIA pour les actions importantes (play, pause, seek)
+- Test sur lecteurs d'écran mobiles (VoiceOver, TalkBack)
+
 ## Roadmap
-1. [ ] Implémenter les styles mobiles
-2. [ ] Refonte de l'UI des contrôles
-3. [ ] Ajouter les animations
-4. [ ] Optimiser le chargement
+1. [ ] Implémenter les styles mobiles (responsive, safe-area, touch-action)
+2. [ ] Refonte de l'UI des contrôles (mobile first, accessibilité, ergonomie)
+3. [ ] Ajouter les animations (auto-hide, pulse, transitions)
+4. [ ] Optimiser le chargement (lazy loading, préloader, gestion HLS)
 
 ## Bonnes Pratiques
 - Utiliser `safe-area-inset` pour iOS
 - `touch-action: manipulation` pour éviter les délais
 - `screen.orientation.lock()` pour le mode paysage
+- Tester l'accessibilité (a11y) sur mobile et desktop
+- Privilégier une évolution incrémentale des contrôles pour faciliter la QA et le feedback UX

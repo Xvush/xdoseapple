@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import ReactPlayer from 'react-player';
 import { XDoseLogo } from './XDoseLogo';
 import { Pause, Play, Volume2, VolumeX, Maximize2, Loader2 } from 'lucide-react';
+import './XDoseVideoPlayer.css';
 
 interface XDoseVideoPlayerProps {
   url: string;
@@ -127,7 +128,7 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full aspect-video bg-black rounded-xl overflow-hidden group select-none">
+    <div ref={containerRef} className="xdose-player relative w-full aspect-video bg-black rounded-xl overflow-hidden group select-none">
       {/* Overlay branding */}
       <div className="absolute top-1 left-1 z-20 flex items-center gap-1 pointer-events-none">
         <XDoseLogo size="sm" animated className="!text-base" />
@@ -185,7 +186,7 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
       )}
       {/* Custom Controls */}
       {(showControls || document.fullscreenElement !== containerRef.current) && (
-        <div className="absolute bottom-0 left-0 right-0 z-20 p-2 bg-gradient-to-t from-black/80 to-transparent flex flex-col gap-1 opacity-100 transition">
+        <div className="controls-container absolute bottom-0 left-0 right-0 z-20 pb-safe flex flex-col gap-2 opacity-100 transition">
           {/* Progress bar */}
           <input
             type="range"
@@ -194,14 +195,25 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
             step={0.01}
             value={progress.played}
             onChange={handleSeek}
-            className="w-full accent-brand-purple-500 h-1 cursor-pointer"
+            className="w-full accent-brand-purple-500 h-2 cursor-pointer rounded-lg bg-neutral-200/60"
+            aria-label="Avancer/Reculer"
           />
-          <div className="flex items-center justify-between gap-1">
-            <button onClick={handlePlayPause} className="bg-white/20 hover:bg-white/40 text-white rounded-full p-1.5">
-              {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          <div className="flex items-center justify-between gap-2 px-1 py-1">
+            <button
+              onClick={handlePlayPause}
+              aria-label={playing ? 'Pause' : 'Lecture'}
+              className="bg-brand-purple-600 hover:bg-brand-purple-700 text-white rounded-full p-3 shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-purple-400 transition-all"
+              style={{ minWidth: 44, minHeight: 44 }}
+            >
+              {playing ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
             </button>
-            <button onClick={handleMute} className="bg-white/20 hover:bg-white/40 text-white rounded-full p-1.5">
-              {muted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            <button
+              onClick={handleMute}
+              aria-label={muted || volume === 0 ? 'Activer le son' : 'Couper le son'}
+              className="bg-white/20 hover:bg-white/40 text-white rounded-full p-3 focus:outline-none focus:ring-2 focus:ring-brand-purple-400 transition-all"
+              style={{ minWidth: 44, minHeight: 44 }}
+            >
+              {muted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
             <input
               type="range"
@@ -210,10 +222,16 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
               step={0.01}
               value={volume}
               onChange={handleVolume}
-              className="accent-brand-purple-500 h-1 w-14 cursor-pointer"
+              className="accent-brand-purple-500 h-2 w-20 mx-2 cursor-pointer rounded-lg bg-neutral-200/60"
+              aria-label="Volume"
             />
-            <button onClick={handleFullscreen} className="bg-white/20 hover:bg-white/40 text-white rounded-full p-1.5 ml-auto">
-              <Maximize2 className="w-4 h-4" />
+            <button
+              onClick={handleFullscreen}
+              aria-label="Plein écran"
+              className="bg-white/20 hover:bg-white/40 text-white rounded-full p-3 ml-auto focus:outline-none focus:ring-2 focus:ring-brand-purple-400 transition-all"
+              style={{ minWidth: 44, minHeight: 44 }}
+            >
+              <Maximize2 className="w-5 h-5" />
             </button>
           </div>
         </div>
