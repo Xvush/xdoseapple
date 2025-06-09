@@ -184,16 +184,18 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 
 ### 9.1. Wizard d’upload vidéo (UX premium)
 - [x] Étape 1 : Formulaire enrichi (titre, description, tags, preview thumbnail, UX multi-tags chips)
-- [x] Étape 2 : Récapitulatif avant publication (aperçu miniature, titre, tags, bouton "Publier")
+- [x] Étape 2 : Récapitulatif avant publication (aperçu miniature, titre, tags, bouton "Publier" bien visible)
 - [x] Possibilité de revenir en arrière avant validation
 - [x] Bouton "Publier" accessible dès l’étape 1 pour fluidifier le flow (validation + publication directe)
+- [x] Bouton "Publier" bien visible à l’étape 2 pour valider après récapitulatif
 - [ ] Option "Enregistrer en brouillon" (bonus)
 
 > **Avancement** :
 > - Saisie des tags premium (chips interactives, limite, feedback, suppression, pas de doublons).
 > - Preview vidéo et thumbnail dès la sélection.
 > - Navigation fluide entre étapes, feedback clair, publication possible à tout moment.
-> - UX validée, aucune erreur bloquante, expérience premium prête pour QA.
+> - Publication possible soit directement à l’étape 1, soit après récapitulatif à l’étape 2 (UX validée, conforme à la demande).
+> - Aucune erreur bloquante, expérience premium prête pour QA.
 
 ### 9.2. Édition des métadonnées vidéo après publication
 - [x] Bouton "Éditer" visible uniquement pour le créateur sur chaque vidéo de son profil
