@@ -27,7 +27,7 @@ const Profile = () => {
   useEffect(() => {
     if (!profileId) return;
     setLoading(true);
-    fetch(`/api/profile-id?id=${profileId}`)
+    fetch(`/api/profile?id=${profileId}`)
       .then(async (res) => {
         if (!res || res.status === 404) {
           setNotFound(true);
@@ -51,7 +51,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (profileData && profileData.role === 'creator') {
-      fetch(`/api/getProfileVideos.js?id=${profileData.id}`)
+      fetch(`/api/profile?videos&id=${profileData.id}`)
         .then(async res => {
           const contentType = res.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {

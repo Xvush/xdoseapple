@@ -21,8 +21,8 @@ const EditProfile = () => {
     setLoading(true);
     setError('');
     setSuccess(false);
-    const res = await fetch('/api/update-profile.js', {
-      method: 'POST',
+    const res = await fetch('/api/profile', {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: user.id,
