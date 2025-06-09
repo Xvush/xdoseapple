@@ -238,9 +238,21 @@ const Studio = () => {
                 disabled={uploading}
               />
               <TagInput tags={tags} setTags={setTags} disabled={uploading} />
-              <Button className="w-full bg-brand-purple-600 text-white rounded-xl mt-4" onClick={handleNext} disabled={!isStep1Valid || uploading}>
-                Suivant
-              </Button>
+              <div className="flex gap-2 mt-4">
+                <Button className="flex-1 apple-button-secondary rounded-xl" onClick={handleNext} disabled={!isStep1Valid || uploading}>
+                  Suivant
+                </Button>
+                <Button className="flex-1 bg-brand-purple-600 text-white rounded-xl" onClick={async () => {
+                  if (!isStep1Valid || uploading) return;
+                  setWizardStep(2);
+                  await new Promise(r => setTimeout(r, 100)); // Laisse le temps au DOM de passer à l'étape 2
+                  handlePublish();
+                }} disabled={!isStep1Valid || uploading}>
+                  Publier
+                </Button>
+              </div>
+              {uploadError && <div className="text-red-500 text-sm mt-2">{uploadError}</div>}
+              {uploadSuccess && <div className="text-green-600 text-sm mt-2">Vidéo uploadée ! Traitement en cours…</div>}
             </div>
           </div>
         )}
