@@ -204,7 +204,7 @@ const Profile = () => {
               <Button className="flex-1 bg-gradient-to-r from-brand-purple-500 to-brand-teal-500 hover:from-brand-purple-600 hover:to-brand-teal-600 text-white rounded-xl font-medium">
                 Gérer mon abonnement
               </Button>
-              <Button className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl font-medium">
+              <Button className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl font-medium" onClick={() => navigate('/edit-profile')}>
                 Modifier mon profil
               </Button>
             </div>
