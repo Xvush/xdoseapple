@@ -11,6 +11,7 @@ import Discover from "./pages/Discover";
 import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
 import Studio from "./pages/Studio";
+import EditProfile from "./pages/EditProfile";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/feed" element={<Feed />} />
             <Route path="/profile/:id" element={<Profile />} />
             <Route path="/studio" element={<Studio />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
