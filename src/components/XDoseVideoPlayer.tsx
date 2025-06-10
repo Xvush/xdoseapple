@@ -124,30 +124,31 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
     }
   }, [volume, muted]);
 
-  // Auto-hide controls after 2.5s inactivity
+  // Auto-hide controls after 2.5s inactivity, always visible if paused
   useEffect(() => {
+    if (!isPlaying) {
+      setShowControls(true);
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+      return;
+    }
     if (!showControls) return;
     if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
     controlsTimeout.current = setTimeout(() => setShowControls(false), 2500);
     return () => controlsTimeout.current && clearTimeout(controlsTimeout.current);
   }, [showControls, isPlaying, currentTime]);
 
-  // Show controls on mouse/touch activity
+  // Show controls on user activity (mousemove, touch, click, scroll)
   const showControlsOnActivity = () => {
     setShowControls(true);
   };
 
-  // Attach listeners to video wrapper
   useEffect(() => {
     const wrapper = document.querySelector('.xdose-player-video-wrapper');
     if (!wrapper) return;
-    wrapper.addEventListener('mousemove', showControlsOnActivity);
-    wrapper.addEventListener('touchstart', showControlsOnActivity);
-    wrapper.addEventListener('click', showControlsOnActivity);
+    const events = ['mousemove', 'touchstart', 'click', 'scroll'];
+    events.forEach((event) => wrapper.addEventListener(event, showControlsOnActivity));
     return () => {
-      wrapper.removeEventListener('mousemove', showControlsOnActivity);
-      wrapper.removeEventListener('touchstart', showControlsOnActivity);
-      wrapper.removeEventListener('click', showControlsOnActivity);
+      events.forEach((event) => wrapper.removeEventListener(event, showControlsOnActivity));
     };
   }, []);
 
@@ -181,7 +182,7 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
         )}
       </div>
       {controls && (
-        <div className={`xdose-player-controls${showControls ? '' : ' xdose-player-controls--hidden'}`}>
+        <div className={`xdose-player-controls${showControls ? '' : ' xdose-player-controls--hidden'}`} tabIndex={-1} aria-live="polite">
           {/* Play/Pause */}
           <button onClick={togglePlay} aria-label={isPlaying ? "Pause" : "Lecture"}>
             {isPlaying ? <Pause size={28} /> : <Play size={28} />}
