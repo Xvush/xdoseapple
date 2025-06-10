@@ -20,6 +20,7 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
   controls = true,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const playerRootRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -87,10 +88,10 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
 
   // Fullscreen
   const toggleFullscreen = () => {
-    const video = videoRef.current;
-    if (!video) return;
+    const playerRoot = playerRootRef.current;
+    if (!playerRoot) return;
     if (!document.fullscreenElement) {
-      video.parentElement?.requestFullscreen();
+      playerRoot.requestFullscreen();
       setIsFullscreen(true);
     } else {
       document.exitFullscreen();
@@ -147,18 +148,16 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
   };
 
   useEffect(() => {
-    const wrapper = document.querySelector('.xdose-player-video-wrapper');
-    const controls = document.querySelector('.xdose-player-controls');
-    // Ajout : tous les overlays ou modals qui pourraient capter l'activité
-    const overlays = Array.from(document.querySelectorAll('.xdose-player-overlay, .xdose-player-vignette, .xdose-player-meta-edit'));
+    const playerRoot = playerRootRef.current;
+    const video = videoRef.current;
     const events = ['mousemove', 'touchstart', 'click', 'scroll'];
-    const allTargets = [wrapper, controls, ...overlays].filter(Boolean);
-    allTargets.forEach(target => {
-      events.forEach(event => target.addEventListener(event, showControlsOnActivity));
+    const targets = [playerRoot, video].filter(Boolean);
+    targets.forEach(target => {
+      events.forEach(event => target!.addEventListener(event, showControlsOnActivity));
     });
     return () => {
-      allTargets.forEach(target => {
-        events.forEach(event => target.removeEventListener(event, showControlsOnActivity));
+      targets.forEach(target => {
+        events.forEach(event => target!.removeEventListener(event, showControlsOnActivity));
       });
     };
   }, []);
@@ -172,7 +171,7 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
   };
 
   return (
-    <div className="xdose-player-root">
+    <div className="xdose-player-root" ref={playerRootRef}>
       <div className="xdose-player-video-wrapper">
         <video
           ref={videoRef}
