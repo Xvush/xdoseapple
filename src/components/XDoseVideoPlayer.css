@@ -23,7 +23,12 @@
   }
 }
 .controls-container {
-  opacity: 1;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 40px !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
   padding-bottom: 1rem;
   box-sizing: border-box;
   transition: opacity 0.3s ease-in-out;
