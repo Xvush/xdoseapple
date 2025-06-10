@@ -12,7 +12,6 @@ export default function XDoseVideoPlayer({ src }) {
   const controlsTimeout = useRef(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(true);
@@ -31,14 +30,8 @@ export default function XDoseVideoPlayer({ src }) {
     const video = videoRef.current;
     if (!video) return;
     const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => {
-      setIsPlaying(false);
-      setShowControls(true);
-    };
-    const handleEnded = () => {
-      setIsPlaying(false);
-      setShowControls(true);
-    };
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("ended", handleEnded);
@@ -75,7 +68,6 @@ export default function XDoseVideoPlayer({ src }) {
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
-      setShowControls(true);
     };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);

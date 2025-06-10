@@ -76,6 +76,10 @@
     box-sizing: border-box !important;
     /* Désactive tout masquage ou effondrement */
     transition: none !important;
+    background: rgba(0,0,0,0.6) !important;
+    border-radius: 1rem !important;
+    /* Debug visuel temporaire */
+    outline: 2px solid #a855f7 !important;
   }
 }
 @media (max-width: 640px) {
