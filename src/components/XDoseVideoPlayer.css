@@ -247,9 +247,14 @@
 .xdose-player-video-wrapper video:-webkit-full-screen {
   width: 100vw !important;
   height: 100vh !important;
-  object-fit: cover !important; /* Fill the screen, crop if needed */
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  object-fit: cover !important;
   border-radius: 0 !important;
   background: #000 !important;
+  display: block !important;
 }
 
 .xdose-player-root:fullscreen .xdose-player-controls,
@@ -284,7 +289,14 @@
   .xdose-player-video-wrapper video:-webkit-full-screen {
     width: 100vw !important;
     height: 100vh !important;
+    min-width: 100vw !important;
+    min-height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
     object-fit: cover !important;
+    border-radius: 0 !important;
+    background: #000 !important;
+    display: block !important;
   }
 }
 
@@ -303,6 +315,13 @@
   .xdose-player-video-wrapper video:-webkit-full-screen {
     width: 100vw !important;
     height: 100vh !important;
+    min-width: 100vw !important;
+    min-height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
     object-fit: cover !important;
+    border-radius: 0 !important;
+    background: #000 !important;
+    display: block !important;
   }
 }
