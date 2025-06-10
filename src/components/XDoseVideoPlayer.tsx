@@ -237,12 +237,23 @@ export default function XDoseVideoPlayer({ src }) {
 
       {/* Contrôles premium */}
       <div
-        className="controls-container absolute left-1/2 -translate-x-1/2 bottom-10 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg z-30"
-        // Vérification : aucune classe sm:hidden, hidden, ou collapse n'est appliquée ici
-        // Les contrôles sont toujours visibles et interactifs sur desktop/mobile
+        className="controls-container fixed left-1/2 bottom-8 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg z-50"
+        // Correction : position fixed + left: 50% + translateX(-50%) pour garantir que le container est toujours centré et visible
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: 40,
+          opacity: 1,
+          pointerEvents: 'auto',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          maxWidth: '98vw',
+          width: '100%',
+          zIndex: 99999,
+        }}
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 40, opacity: 1, pointerEvents: 'auto' }}
       >
         {/* Play/Pause central avec animation pulse */}
         <button

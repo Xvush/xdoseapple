@@ -63,7 +63,14 @@
   animation: fade-in 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 @media (min-width: 641px) {
-  .xdose-player .controls-container {
+  .xdose-player .controls-container,
+  .controls-container {
+    position: fixed !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 8px !important;
+    width: 98vw !important;
+    max-width: 700px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
@@ -72,14 +79,12 @@
     pointer-events: auto !important;
     visibility: visible !important;
     height: auto !important;
-    z-index: 9999 !important;
+    z-index: 99999 !important;
     box-sizing: border-box !important;
-    /* Désactive tout masquage ou effondrement */
-    transition: none !important;
-    background: rgba(0,0,0,0.6) !important;
+    background: rgba(0,0,0,0.7) !important;
     border-radius: 1rem !important;
-    /* Debug visuel temporaire */
     outline: 2px solid #a855f7 !important;
+    transition: none !important;
   }
 }
 @media (max-width: 640px) {
