@@ -81,32 +81,6 @@ export default function XDoseVideoPlayer({ src }) {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // Helper pour savoir si on doit masquer automatiquement les contrôles
-  const shouldAutoHide = isPlaying && (isFullscreen || !isMobile) && hasInteracted;
-
-  // Auto-hide des contrôles
-  useEffect(() => {
-    // Toujours afficher les contrôles si la vidéo est en pause, terminée ou jamais lancée
-    if (!isPlaying || hasEnded || !hasInteracted) {
-      setShowControls(true);
-      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-      return;
-    }
-    // Masquage auto seulement si shouldAutoHide
-    if (shouldAutoHide) {
-      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-      controlsTimeout.current = setTimeout(() => {
-        if (shouldAutoHide) setShowControls(false);
-      }, 3000);
-    } else {
-      setShowControls(true);
-      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-    }
-    return () => {
-      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-    };
-  }, [isPlaying, isFullscreen, showControls, isMobile, hasEnded, hasInteracted, shouldAutoHide]);
-
   // Play/pause robuste
   const togglePlay = async (e) => {
     if (e) e.stopPropagation();
@@ -216,11 +190,6 @@ export default function XDoseVideoPlayer({ src }) {
       ref={containerRef}
       className="xdose-player relative w-full aspect-video bg-black rounded-xl overflow-hidden group select-none"
       tabIndex={0}
-      onMouseMove={() => setShowControls(true)}
-      onClick={() => setShowControls(true)}
-      onMouseLeave={() => {
-        if (shouldAutoHide) setShowControls(false);
-      }}
     >
       <video
         ref={videoRef}
@@ -276,12 +245,10 @@ export default function XDoseVideoPlayer({ src }) {
 
       {/* Contrôles premium */}
       <div
-        className={`controls-container absolute left-1/2 -translate-x-1/2 bottom-10 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg transition-all duration-300 z-30 ${
-          showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        } ${isFullscreen ? 'force-show-controls' : ''}`}
+        className="controls-container absolute left-1/2 -translate-x-1/2 bottom-10 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg z-30"
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
-        style={{ pointerEvents: showControls ? 'auto' : 'none', opacity: showControls ? 1 : 0 }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 40, opacity: 1, pointerEvents: 'auto' }}
       >
         {/* Play/Pause central avec animation pulse */}
         <button
