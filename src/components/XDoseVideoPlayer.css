@@ -33,6 +33,8 @@
   right: 0;
   z-index: 9999;
   pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .xdose-player:fullscreen {
@@ -53,4 +55,11 @@
 }
 .animate-fade-in {
   animation: fade-in 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+@media (min-width: 641px) {
+  .xdose-player:hover .controls-container {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.3s ease-in-out;
+  }
 }
