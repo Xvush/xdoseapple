@@ -57,8 +57,7 @@
   animation: fade-in 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 @media (min-width: 641px) {
-  .xdose-player:hover .controls-container,
-  .xdose-player .controls-container.force-show-controls {
+  .xdose-player .controls-container {
     opacity: 1 !important;
     pointer-events: auto !important;
     transition: opacity 0.3s ease-in-out;
