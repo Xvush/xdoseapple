@@ -245,7 +245,7 @@ export default function XDoseVideoPlayer({ src }) {
       <div
         className={`controls-container absolute left-1/2 -translate-x-1/2 bottom-6 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg transition-all duration-300 z-30 ${
           showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        } ${isFullscreen ? 'force-show-controls' : ''}`}
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
         style={{ pointerEvents: showControls ? 'auto' : 'none' }}
