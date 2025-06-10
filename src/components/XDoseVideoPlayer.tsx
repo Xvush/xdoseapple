@@ -57,19 +57,26 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster 
   const [showControls, setShowControls] = useState(true);
   const controlsTimeout = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const originalParent = useRef<HTMLElement | null>(null);
 
-  // Affiche les contrôles au clic/tap sur toute la zone vidéo (même en plein écran), et au mouvement souris sur desktop
+  // Affiche les contrôles au clic/tap/mousemove, masque auto uniquement en plein écran
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const handleInteraction = () => {
       setShowControls(true);
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-      controlsTimeout.current = setTimeout(() => setShowControls(false), 3000);
+      controlsTimeout.current = setTimeout(() => {
+        // Ne cache les contrôles que si la vidéo est en plein écran
+        if (document.fullscreenElement === el) {
+          setShowControls(false);
+        }
+      }, 3000);
     };
     el.addEventListener('click', handleInteraction);
     el.addEventListener('touchstart', handleInteraction);
-    el.addEventListener('mousemove', handleInteraction); // UX desktop : apparition au survol
+    el.addEventListener('mousemove', handleInteraction);
     return () => {
       el.removeEventListener('click', handleInteraction);
       el.removeEventListener('touchstart', handleInteraction);
@@ -194,7 +201,11 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster 
       )}
       {/* Custom Controls (affichés uniquement si showControls) */}
       {showControls && (
-        <div className="controls-container absolute left-0 right-0 bottom-0 z-20 flex flex-col gap-0 pointer-events-none">
+        <div
+          ref={controlsRef}
+          className="controls-container absolute left-0 right-0 bottom-0 flex flex-col gap-0 pointer-events-auto"
+          style={{ zIndex: 9999, position: 'absolute' }}
+        >
           {/* Progress bar tout en bas */}
           <input
             type="range"
