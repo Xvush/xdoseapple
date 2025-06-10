@@ -132,8 +132,12 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
       return;
     }
-    if (!showControls) return;
+    if (!showControls) {
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+      return;
+    }
     if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+
     controlsTimeout.current = setTimeout(() => {
       const playerRoot = playerRootRef.current;
       if (playerRoot) {
@@ -141,25 +145,27 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
           playerRoot.querySelector('.xdose-player-controls:hover') ||
           playerRoot.querySelector('.xdose-player-settings:hover');
         if (isHovering) {
-          setShowControls(true); // keep visible and reset timer
+          // Do nothing, keep controls visible and timer will reset on next activity
           return;
         }
       }
       setShowControls(false);
     }, 2500);
-    return () => controlsTimeout.current && clearTimeout(controlsTimeout.current);
+
+    return () => {
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    };
   }, [showControls, isPlaying]);
 
   // Show controls on user activity (mousemove, touch, click, scroll)
-  const showControlsOnActivity = () => {
-    setShowControls(true);
-  };
+  const showControlsOnActivity = () => setShowControls(true);
 
   useEffect(() => {
     const playerRoot = playerRootRef.current;
     const video = videoRef.current;
     const events = ['mousemove', 'touchstart', 'click', 'scroll'];
     const targets = [playerRoot, video].filter(Boolean);
+
     targets.forEach(target => {
       events.forEach(event => target!.addEventListener(event, showControlsOnActivity));
     });
