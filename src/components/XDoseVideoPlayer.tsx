@@ -87,7 +87,7 @@ export default function XDoseVideoPlayer({ src }) {
   // Auto-hide des contrôles
   useEffect(() => {
     // Toujours afficher les contrôles si la vidéo est en pause, terminée ou jamais lancée
-    if (!isPlaying || hasEnded || isPaused || !hasInteracted) {
+    if (!isPlaying || hasEnded || !hasInteracted) {
       setShowControls(true);
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
       return;
@@ -105,7 +105,7 @@ export default function XDoseVideoPlayer({ src }) {
     return () => {
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
     };
-  }, [isPlaying, isFullscreen, showControls, isMobile, isPaused, hasEnded, hasInteracted, shouldAutoHide]);
+  }, [isPlaying, isFullscreen, showControls, isMobile, hasEnded, hasInteracted, shouldAutoHide]);
 
   // Play/pause robuste
   const togglePlay = async (e) => {
@@ -281,7 +281,7 @@ export default function XDoseVideoPlayer({ src }) {
         } ${isFullscreen ? 'force-show-controls' : ''}`}
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
-        style={{ pointerEvents: showControls ? 'auto' : 'none' }}
+        style={{ pointerEvents: showControls ? 'auto' : 'none', opacity: showControls ? 1 : 0 }}
       >
         {/* Play/Pause central avec animation pulse */}
         <button
