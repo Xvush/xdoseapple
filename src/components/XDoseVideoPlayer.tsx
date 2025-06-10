@@ -1,16 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
 import ReactPlayer from 'react-player';
-import { XDoseLogo } from './XDoseLogo';
 import { Pause, Play, Volume2, VolumeX, Maximize2, Loader2 } from 'lucide-react';
 import './XDoseVideoPlayer.css';
 
 interface XDoseVideoPlayerProps {
   url: string;
   poster?: string;
-  title?: string;
 }
 
-export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster, title }) => {
+export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster }) => {
   const playerRef = useRef<ReactPlayer>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -60,14 +58,25 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
   const controlsTimeout = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Affiche les contrôles au moindre mouvement/tap, puis les masque après 2s (en plein écran uniquement)
-  const handleUserActivity = () => {
-    setShowControls(true);
-    if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-    if (document.fullscreenElement === containerRef.current) {
-      controlsTimeout.current = setTimeout(() => setShowControls(false), 2000);
-    }
-  };
+  // Affiche les contrôles au clic/tap sur toute la zone vidéo (même en plein écran), et au mouvement souris sur desktop
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handleInteraction = () => {
+      setShowControls(true);
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+      controlsTimeout.current = setTimeout(() => setShowControls(false), 3000);
+    };
+    el.addEventListener('click', handleInteraction);
+    el.addEventListener('touchstart', handleInteraction);
+    el.addEventListener('mousemove', handleInteraction); // UX desktop : apparition au survol
+    return () => {
+      el.removeEventListener('click', handleInteraction);
+      el.removeEventListener('touchstart', handleInteraction);
+      el.removeEventListener('mousemove', handleInteraction);
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    };
+  }, []);
 
   // Plein écran sur le conteneur principal
   const handleStartAndFullscreen = () => {
@@ -90,18 +99,6 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
     document.addEventListener('fullscreenchange', onFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
   }, []);
-
-  // Ajoute listeners pour détecter activité utilisateur sur le conteneur
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.addEventListener('mousemove', handleUserActivity);
-    el.addEventListener('touchstart', handleUserActivity);
-    return () => {
-      el.removeEventListener('mousemove', handleUserActivity);
-      el.removeEventListener('touchstart', handleUserActivity);
-    };
-  }, [hasStarted]);
 
   // Fonction utilitaire pour demander le plein écran compatible navigateurs
   function requestFullscreenCompat(el: HTMLElement) {
@@ -127,13 +124,24 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
     return () => observer.disconnect();
   }, []);
 
+  // Ajout d'un bouton pour quitter le plein écran
+  const handleExitFullscreen = () => {
+    if (document.exitFullscreen) document.exitFullscreen();
+    // @ts-ignore
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    // @ts-ignore
+    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+    // @ts-ignore
+    else if (document.msExitFullscreen) document.msExitFullscreen();
+  };
+
+  // Les contrôles ne sont visibles que si showControls est true
   return (
-    <div ref={containerRef} className="xdose-player relative w-full aspect-video bg-black rounded-xl overflow-hidden group select-none">
-      {/* Overlay branding */}
-      <div className="absolute top-1 left-1 z-20 flex items-center gap-1 pointer-events-none">
-        <XDoseLogo size="sm" animated className="!text-base" />
-        {title && <span className="text-white text-xs font-semibold drop-shadow">{title}</span>}
-      </div>
+    <div
+      ref={containerRef}
+      className="xdose-player relative w-full aspect-video bg-black rounded-xl overflow-hidden group select-none"
+      style={{ touchAction: 'manipulation' }}
+    >
       {/* Loader pendant buffering */}
       {buffering && (
         <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/40">
@@ -184,10 +192,10 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
           }}
         />
       )}
-      {/* Custom Controls */}
-      {(showControls || document.fullscreenElement !== containerRef.current) && (
-        <div className="controls-container absolute bottom-0 left-0 right-0 z-20 pb-safe flex flex-col gap-2 opacity-100 transition">
-          {/* Progress bar */}
+      {/* Custom Controls (affichés uniquement si showControls) */}
+      {showControls && (
+        <div className="controls-container absolute left-0 right-0 bottom-0 z-20 flex flex-col gap-0 pointer-events-none">
+          {/* Progress bar tout en bas */}
           <input
             type="range"
             min={0}
@@ -195,10 +203,12 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
             step={0.01}
             value={progress.played}
             onChange={handleSeek}
-            className="w-full accent-brand-purple-500 h-2 cursor-pointer rounded-lg bg-neutral-200/60"
+            className="w-full accent-brand-purple-500 h-2 cursor-pointer rounded-lg bg-neutral-200/60 pointer-events-auto"
             aria-label="Avancer/Reculer"
+            style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 30 }}
           />
-          <div className="flex items-center justify-between gap-2 px-1 py-1">
+          {/* Contrôles principaux */}
+          <div className="flex items-center justify-between gap-2 px-1 py-1 pointer-events-auto" style={{ position: 'relative', zIndex: 20, marginBottom: '2.2rem' }}>
             <button
               onClick={handlePlayPause}
               aria-label={playing ? 'Pause' : 'Lecture'}
@@ -233,6 +243,18 @@ export const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({ url, poster,
             >
               <Maximize2 className="w-5 h-5" />
             </button>
+            {/* Bouton quitter plein écran si on est en plein écran */}
+            {document.fullscreenElement === containerRef.current && (
+              <button
+                onClick={handleExitFullscreen}
+                aria-label="Quitter le plein écran"
+                className="bg-white/20 hover:bg-white/40 text-white rounded-full p-3 ml-2 focus:outline-none focus:ring-2 focus:ring-brand-purple-400 transition-all"
+                style={{ minWidth: 44, minHeight: 44 }}
+              >
+                {/* Utilise une icône X ou Minimize2 */}
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            )}
           </div>
         </div>
       )}
