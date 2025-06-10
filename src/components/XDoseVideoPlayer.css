@@ -58,15 +58,15 @@
 }
 @media (min-width: 641px) {
   .xdose-player .controls-container {
-    opacity: 1 !important;
-    pointer-events: auto !important;
+    transition: opacity 0.3s ease-in-out;
+  }
+  .xdose-player:hover .controls-container,
+  .xdose-player .controls-container.force-show-controls {
     transition: opacity 0.3s ease-in-out;
   }
 }
 @media (max-width: 640px) {
   .xdose-player .controls-container {
-    opacity: 1 !important;
-    pointer-events: auto !important;
     transition: opacity 0.3s ease-in-out;
   }
 }

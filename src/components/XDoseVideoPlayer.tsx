@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { Maximize2, Minimize2, Pause, Play, Volume1, VolumeX } from "lucide-react";
 import "./XDoseVideoPlayer.css";
 import Hls from "hls.js";
+import { useIsMobile } from "../hooks/use-mobile";
 
 export default function XDoseVideoPlayer({ src }) {
   const videoRef = useRef(null);
@@ -21,18 +22,24 @@ export default function XDoseVideoPlayer({ src }) {
   const [showLoader, setShowLoader] = useState(false);
   const [showTooltip, setShowTooltip] = useState(null);
   const [hasInteracted, setHasInteracted] = useState(false); // Nouvel état pour l'interaction utilisateur
+  const isMobile = useIsMobile();
+  const [isPaused, setIsPaused] = useState(true);
+  const [hasEnded, setHasEnded] = useState(false);
 
   // Synchronise play/pause
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    const handlePlay = () => { setIsPlaying(true); setIsPaused(false); setHasEnded(false); };
+    const handlePause = () => { setIsPlaying(false); setIsPaused(true); };
+    const handleEnded = () => { setIsPlaying(false); setIsPaused(false); setHasEnded(true); };
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handleEnded);
     return () => {
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handleEnded);
     };
   }, []);
 
@@ -70,11 +77,17 @@ export default function XDoseVideoPlayer({ src }) {
 
   // Auto-hide des contrôles
   useEffect(() => {
-    if (!isPlaying || !isFullscreen) return;
+    // Toujours afficher les contrôles si la vidéo est en pause ou terminée
+    if (!isPlaying || isPaused || hasEnded) {
+      setShowControls(true);
+      return;
+    }
+    // Masquer automatiquement après délai seulement si en lecture et (en plein écran OU sur desktop)
+    if (!isFullscreen && isMobile) return;
     if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
     controlsTimeout.current = setTimeout(() => setShowControls(false), 3000);
     return () => controlsTimeout.current && clearTimeout(controlsTimeout.current);
-  }, [isPlaying, isFullscreen, showControls]);
+  }, [isPlaying, isFullscreen, showControls, isMobile, isPaused, hasEnded]);
 
   // Play/pause robuste
   const togglePlay = async (e) => {
@@ -187,7 +200,11 @@ export default function XDoseVideoPlayer({ src }) {
       tabIndex={0}
       onMouseMove={() => setShowControls(true)}
       onClick={() => setShowControls(true)}
-      onMouseLeave={() => isFullscreen && setShowControls(false)}
+      onMouseLeave={() => {
+        if (isFullscreen || !isMobile) {
+          setShowControls(false);
+        }
+      }}
     >
       <video
         ref={videoRef}
