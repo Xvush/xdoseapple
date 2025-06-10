@@ -228,7 +228,7 @@ export default function XDoseVideoPlayer({ src }) {
       )}
 
       {/* Barre de progression custom tout en bas */}
-      <div className="absolute left-0 right-0 bottom-3 z-20 h-2 flex items-center">
+      <div className="absolute left-0 right-0 bottom-3 z-20 h-2 flex items-center pointer-events-auto">
         <input
           type="range"
           min={0}
@@ -243,7 +243,7 @@ export default function XDoseVideoPlayer({ src }) {
 
       {/* Contrôles premium */}
       <div
-        className={`controls-container absolute left-1/2 -translate-x-1/2 bottom-6 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg transition-all duration-300 z-30 ${
+        className={`controls-container absolute left-1/2 -translate-x-1/2 bottom-10 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg transition-all duration-300 z-30 ${
           showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         } ${isFullscreen ? 'force-show-controls' : ''}`}
         onClick={e => e.stopPropagation()}
