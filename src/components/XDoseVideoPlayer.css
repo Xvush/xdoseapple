@@ -15,7 +15,11 @@
     touch-action: manipulation;
   }
   .controls-container {
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 98vw !important;
+    max-width: 100vw !important;
   }
 }
 .controls-container {
@@ -34,4 +38,19 @@
 .xdose-player:fullscreen {
   width: 100% !important;
   height: 100% !important;
+}
+.animate-pulse-on-play {
+  animation: pulse 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(168,85,247,0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(168,85,247,0); }
+  100% { box-shadow: 0 0 0 0 rgba(168,85,247,0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s cubic-bezier(0.4,0,0.2,1);
 }

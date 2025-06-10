@@ -17,6 +17,8 @@ export default function XDoseVideoPlayer({ src }) {
   const [muted, setMuted] = useState(true);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [showVolumeDrawer, setShowVolumeDrawer] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
 
   // Synchronise play/pause
   useEffect(() => {
@@ -148,6 +150,29 @@ export default function XDoseVideoPlayer({ src }) {
     };
   }, [src]);
 
+  // Gestion du loader circulaire (affiché si buffering > 300ms)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let timeout;
+    const handleWaiting = () => {
+      timeout = setTimeout(() => setShowLoader(true), 300);
+    };
+    const handlePlaying = () => {
+      clearTimeout(timeout);
+      setShowLoader(false);
+    };
+    video.addEventListener("waiting", handleWaiting);
+    video.addEventListener("playing", handlePlaying);
+    video.addEventListener("seeked", handlePlaying);
+    return () => {
+      video.removeEventListener("waiting", handleWaiting);
+      video.removeEventListener("playing", handlePlaying);
+      video.removeEventListener("seeked", handlePlaying);
+      clearTimeout(timeout);
+    };
+  }, []);
+
   return (
     <div
       ref={containerRef}
@@ -183,7 +208,7 @@ export default function XDoseVideoPlayer({ src }) {
       )}
 
       {/* Barre de progression custom tout en bas */}
-      <div className="absolute left-0 right-0 bottom-0 z-20 h-2 flex items-center">
+      <div className="absolute left-0 right-0 bottom-3 z-20 h-2 flex items-center">
         <input
           type="range"
           min={0}
@@ -191,7 +216,7 @@ export default function XDoseVideoPlayer({ src }) {
           step={0.1}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-2 accent-green-400 bg-transparent cursor-pointer progress-bar"
+          className="w-full h-2 accent-brand-purple-500 bg-transparent cursor-pointer progress-bar"
           aria-label="Barre de progression"
         />
       </div>
@@ -199,32 +224,48 @@ export default function XDoseVideoPlayer({ src }) {
       {/* Contrôles premium */}
       {showControls && (
         <div
-          className={`controls-container absolute bottom-2 left-0 right-0 flex justify-between items-center gap-4 bg-black/60 p-2 transition-opacity duration-300 z-30 ${
+          className={`controls-container absolute left-1/2 -translate-x-1/2 bottom-6 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg transition-all duration-300 z-30 ${
             showControls || !isFullscreen ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           onClick={e => e.stopPropagation()}
           onMouseDown={e => e.stopPropagation()}
         >
-          {/* Lecture */}
+          {/* Play/Pause central avec animation pulse */}
           <button
             onClick={togglePlay}
-            className="text-white hover:text-green-400 transition"
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-brand-purple-500/90 hover:bg-brand-purple-600 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-purple-300 transition-all duration-200 animate-pulse-on-play"
             aria-label={isPlaying ? "Pause" : "Lecture"}
             tabIndex={0}
           >
-            {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+            {isPlaying ? <Pause size={32} /> : <Play size={32} />}
           </button>
 
-          {/* Volume */}
-          <div className="flex items-center gap-2">
+          {/* Drawer/Popover pour volume et options avancées (mobile first) */}
+          <div className="relative flex items-center">
             <button
-              onClick={toggleMute}
-              className="text-white hover:text-green-400 transition"
+              onClick={() => setShowVolumeDrawer(v => !v)}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-black/40 hover:bg-brand-purple-100 text-white hover:text-brand-purple-700 transition"
               aria-label={muted || volume === 0 ? "Activer le son" : "Couper le son"}
               tabIndex={0}
             >
               {muted || volume === 0 ? <VolumeX size={24} /> : <Volume1 size={24} />}
             </button>
+            {/* Drawer volume mobile : visible si showVolumeDrawer, sinon caché */}
+            {showVolumeDrawer && (
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-12 sm:hidden flex flex-col items-center bg-black/90 rounded-xl px-4 py-3 shadow-lg z-40 animate-fade-in">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={muted ? 0 : volume}
+                  onChange={changeVolume}
+                  className="w-32 accent-brand-purple-500"
+                  aria-label="Volume"
+                />
+              </div>
+            )}
+            {/* Slider volume desktop : visible uniquement sur sm+ */}
             <input
               type="range"
               min="0"
@@ -232,12 +273,12 @@ export default function XDoseVideoPlayer({ src }) {
               step="0.01"
               value={muted ? 0 : volume}
               onChange={changeVolume}
-              className="w-24 cursor-pointer"
+              className="hidden sm:block w-24 ml-2 cursor-pointer accent-brand-purple-500"
               aria-label="Volume"
             />
           </div>
 
-          {/* Temps */}
+          {/* Temps courant/total */}
           <div className="text-white text-xs font-mono min-w-[60px] text-center select-none">
             {formatTime(currentTime)} / {formatTime(duration)}
           </div>
@@ -245,12 +286,19 @@ export default function XDoseVideoPlayer({ src }) {
           {/* Plein écran */}
           <button
             onClick={toggleFullscreen}
-            className="text-white hover:text-green-400 transition"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-black/40 hover:bg-brand-purple-100 text-white hover:text-brand-purple-700 transition"
             aria-label={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
             tabIndex={0}
           >
             {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
           </button>
+        </div>
+      )}
+
+      {/* Loader circulaire pendant le buffering (affiché si buffering > 300ms) */}
+      {showLoader && (
+        <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
+          <div className="w-12 h-12 border-4 border-brand-purple-500 border-t-transparent rounded-full animate-spin" aria-label="Chargement" />
         </div>
       )}
     </div>

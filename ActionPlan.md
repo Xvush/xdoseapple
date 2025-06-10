@@ -258,9 +258,15 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 
 ### 2. Améliorations UX
 - Barre de progression déplacée en bas
-- Auto-hide des contrôles après 3s
+- Auto-hide des contrôles après 3s (animation fade/slide, transition d’opacité fluide)
 - Animation pulse sur bouton play
 - Mode paysage automatique
+- Contrôles secondaires (volume, qualité, etc.) accessibles via drawer/menu plus
+- Haptique sur double tap seek (mobile/PWA si supporté)
+- Tooltips accessibles (aria-describedby) sur desktop
+- Loader circulaire affiché uniquement si buffering > 300ms
+- Overlay “tap to play” avant lecture (mobile)
+- Responsive avancé : certains boutons masqués en paysage ou sur petits écrans
 
 ### 3. Optimisations Techniques
 - Lazy loading amélioré
@@ -275,9 +281,9 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - Test sur lecteurs d'écran mobiles (VoiceOver, TalkBack)
 
 ## Roadmap
-1. [ ] Implémenter les styles mobiles (responsive, safe-area, touch-action)
-2. [ ] Refonte de l'UI des contrôles (mobile first, accessibilité, ergonomie)
-3. [ ] Ajouter les animations (auto-hide, pulse, transitions)
+1. [x] Implémenter les styles mobiles (responsive, safe-area, touch-action)
+2. [x] Refonte de l'UI des contrôles (mobile first, accessibilité, ergonomie)
+3. [x] Ajouter les animations (auto-hide, pulse, transitions)
 4. [ ] Optimiser le chargement (lazy loading, préloader, gestion HLS)
 
 ## Bonnes Pratiques
