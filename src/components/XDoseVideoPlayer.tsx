@@ -1,103 +1,139 @@
-"use client";
+// Composant React complet : lecteur vidéo interactif premium XDoseVideoPlayer
 
-import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Volume1, VolumeX, Maximize, Minimize } from "lucide-react";
-import "./XDoseVideoPlayer.css"; // Assure-toi que ce fichier contient le CSS mentionné plus bas
+import { useRef, useState, useEffect } from "react";
+import { Maximize2, Minimize2, Pause, Play, Volume1, VolumeX } from "lucide-react";
+import "./XDoseVideoPlayer.css";
 
-export default function XDoseVideoPlayer({ src }: { src: string }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const controlsTimeout = useRef<NodeJS.Timeout | null>(null);
+export default function XDoseVideoPlayer({ src }) {
+  const videoRef = useRef(null);
+  const containerRef = useRef(null);
+  const controlsTimeout = useRef(null);
 
-  const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(true);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
 
-  // Lecture/Pause
-  const togglePlay = () => {
+  // Synchronise play/pause
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) {
-      video.play();
-      setPlaying(true);
-    } else {
-      video.pause();
-      setPlaying(false);
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  // Synchronise volume/mute
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = volume;
+    video.muted = muted;
+  }, [volume, muted]);
+
+  // Durée et temps courant
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handleTimeUpdate = () => setCurrentTime(video.currentTime);
+    const handleLoadedMetadata = () => setDuration(video.duration);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+    };
+  }, []);
+
+  // Fullscreen natif
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+      setShowControls(true);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  // Auto-hide des contrôles
+  useEffect(() => {
+    if (!isPlaying || !isFullscreen) return;
+    if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    controlsTimeout.current = setTimeout(() => setShowControls(false), 3000);
+    return () => controlsTimeout.current && clearTimeout(controlsTimeout.current);
+  }, [isPlaying, isFullscreen, showControls]);
+
+  // Play/pause robuste
+  const togglePlay = async (e) => {
+    if (e) e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+    try {
+      if (video.paused || video.ended) {
+        await video.play();
+      } else {
+        video.pause();
+      }
+    } catch (error) {
+      // ignore AbortError
     }
   };
 
   // Volume
-  const toggleMute = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = !video.muted;
-    setMuted(video.muted);
+  const toggleMute = (e) => {
+    if (e) e.stopPropagation();
+    setMuted((m) => !m);
+  };
+  const changeVolume = (e) => {
+    setVolume(parseFloat(e.target.value));
+    setMuted(e.target.value === "0");
   };
 
-  const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
+  // Seek
+  const handleSeek = (e) => {
     const video = videoRef.current;
     if (!video) return;
-    video.volume = newVolume;
-    setVolume(newVolume);
-    setMuted(newVolume === 0);
+    const newTime = parseFloat(e.target.value);
+    video.currentTime = newTime;
+    setCurrentTime(newTime);
   };
 
-  // Plein écran
-  const toggleFullscreen = () => {
+  // Fullscreen
+  const toggleFullscreen = (e) => {
+    if (e) e.stopPropagation();
     const el = containerRef.current;
     if (!el) return;
     if (!document.fullscreenElement) {
-      el.requestFullscreen().then(() => setIsFullscreen(true));
+      el.requestFullscreen();
     } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false));
+      document.exitFullscreen();
     }
   };
 
-  // Masquage auto des contrôles
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const handleInteraction = () => {
-      setShowControls(true);
-      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-      controlsTimeout.current = setTimeout(() => {
-        setShowControls(false);
-      }, 3000);
-    };
-
-    el.addEventListener("mousemove", handleInteraction);
-    el.addEventListener("touchstart", handleInteraction);
-    el.addEventListener("click", handleInteraction);
-
-    return () => {
-      el.removeEventListener("mousemove", handleInteraction);
-      el.removeEventListener("touchstart", handleInteraction);
-      el.removeEventListener("click", handleInteraction);
-      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-    };
-  }, []);
-
-  // Garder lecture à jour
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const updatePlayState = () => setPlaying(!video.paused);
-    video.addEventListener("play", updatePlayState);
-    video.addEventListener("pause", updatePlayState);
-    return () => {
-      video.removeEventListener("play", updatePlayState);
-      video.removeEventListener("pause", updatePlayState);
-    };
-  }, []);
+  // Format temps
+  const formatTime = (s) => {
+    if (isNaN(s)) return "0:00";
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, "0");
+    return `${m}:${sec}`;
+  };
 
   return (
     <div
       ref={containerRef}
       className="xdose-player relative w-full aspect-video bg-black rounded-xl overflow-hidden group select-none"
+      tabIndex={0}
+      onMouseMove={() => setShowControls(true)}
+      onClick={() => setShowControls(true)}
+      onMouseLeave={() => isFullscreen && setShowControls(false)}
     >
       <video
         ref={videoRef}
@@ -106,49 +142,95 @@ export default function XDoseVideoPlayer({ src }: { src: string }) {
         playsInline
         controls={false}
         preload="auto"
-        onClick={togglePlay}
+        muted={muted}
+        autoPlay
+        onClick={e => { if (!isPlaying) togglePlay(e); }}
+        tabIndex={-1}
       />
 
-      <div
-        className={`controls-container absolute bottom-0 left-0 right-0 flex justify-between items-center gap-4 bg-black/60 p-2 transition-opacity duration-300 ${
-          showControls ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        {/* Lecture */}
+      {/* Overlay bouton play centré si la vidéo est en pause */}
+      {!isPlaying && (
         <button
-          onClick={togglePlay}
-          className="text-white hover:text-green-400 transition"
+          className="absolute inset-0 flex items-center justify-center z-30 bg-black/30 hover:bg-black/40 transition"
+          style={{ pointerEvents: 'auto' }}
+          aria-label="Lecture"
+          onClick={e => { e.stopPropagation(); togglePlay(e); }}
         >
-          {playing ? <Pause size={28} /> : <Play size={28} />}
+          <Play size={64} className="text-white drop-shadow-lg" />
         </button>
+      )}
 
-        {/* Volume */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleMute}
-            className="text-white hover:text-green-400 transition"
-          >
-            {muted || volume === 0 ? <VolumeX size={24} /> : <Volume1 size={24} />}
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={muted ? 0 : volume}
-            onChange={changeVolume}
-            className="w-24 cursor-pointer"
-          />
-        </div>
-
-        {/* Plein écran */}
-        <button
-          onClick={toggleFullscreen}
-          className="text-white hover:text-green-400 transition"
-        >
-          {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
-        </button>
+      {/* Barre de progression custom tout en bas */}
+      <div className="absolute left-0 right-0 bottom-0 z-20 h-2 flex items-center">
+        <input
+          type="range"
+          min={0}
+          max={duration}
+          step={0.1}
+          value={currentTime}
+          onChange={handleSeek}
+          className="w-full h-2 accent-green-400 bg-transparent cursor-pointer progress-bar"
+          aria-label="Barre de progression"
+        />
       </div>
+
+      {/* Contrôles premium */}
+      {showControls && (
+        <div
+          className={`controls-container absolute bottom-2 left-0 right-0 flex justify-between items-center gap-4 bg-black/60 p-2 transition-opacity duration-300 z-30 ${
+            showControls || !isFullscreen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          onClick={e => e.stopPropagation()}
+          onMouseDown={e => e.stopPropagation()}
+        >
+          {/* Lecture */}
+          <button
+            onClick={togglePlay}
+            className="text-white hover:text-green-400 transition"
+            aria-label={isPlaying ? "Pause" : "Lecture"}
+            tabIndex={0}
+          >
+            {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+          </button>
+
+          {/* Volume */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleMute}
+              className="text-white hover:text-green-400 transition"
+              aria-label={muted || volume === 0 ? "Activer le son" : "Couper le son"}
+              tabIndex={0}
+            >
+              {muted || volume === 0 ? <VolumeX size={24} /> : <Volume1 size={24} />}
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={muted ? 0 : volume}
+              onChange={changeVolume}
+              className="w-24 cursor-pointer"
+              aria-label="Volume"
+            />
+          </div>
+
+          {/* Temps */}
+          <div className="text-white text-xs font-mono min-w-[60px] text-center select-none">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </div>
+
+          {/* Plein écran */}
+          <button
+            onClick={toggleFullscreen}
+            className="text-white hover:text-green-400 transition"
+            aria-label={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
+            tabIndex={0}
+          >
+            {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

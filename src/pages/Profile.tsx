@@ -5,7 +5,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { XDoseVideoPlayer } from '@/components/XDoseVideoPlayer';
+import XDoseVideoPlayer from '@/components/XDoseVideoPlayer';
 import { EditVideoModal } from '@/components/EditVideoModal';
 
 const Profile = () => {
@@ -243,8 +243,7 @@ const Profile = () => {
               <div key={video.id} className="w-full flex flex-col items-center">
                 <div className="w-full max-w-2xl rounded-t-2xl overflow-hidden bg-black flex flex-col items-center justify-center p-2 relative group shadow-xl">
                   <XDoseVideoPlayer
-                    url={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`}
-                    poster={video.thumbnailUrl || undefined}
+                    src={`https://stream.mux.com/${video.muxPlaybackId}.m3u8`}
                   />
                   {/* Bouton Editer pour le créateur propriétaire */}
                   {isOwner && profileData.role === 'CREATOR' && (
