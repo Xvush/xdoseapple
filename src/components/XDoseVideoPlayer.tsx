@@ -1,106 +1,81 @@
-// Composant React complet : lecteur vidéo interactif premium XDoseVideoPlayer
-
-import { useRef, useState, useEffect } from "react";
-import { Maximize2, Minimize2, Pause, Play, Volume1, VolumeX } from "lucide-react";
-import "./XDoseVideoPlayer.css";
+// XDoseVideoPlayer.tsx
+import React, { useRef, useState, useEffect } from "react";
 import Hls from "hls.js";
-import { useIsMobile } from "../hooks/use-mobile";
+import { Maximize2, Minimize2, Pause, Play, Volume1, VolumeX, Settings, RotateCcw, Repeat, ChevronDown, ChevronUp } from "lucide-react";
+import "./XDoseVideoPlayer.css";
 
-export default function XDoseVideoPlayer({ src }) {
-  const videoRef = useRef(null);
-  const containerRef = useRef(null);
-  const controlsTimeout = useRef(null);
+export interface XDoseVideoPlayerProps {
+  src: string;
+  poster?: string;
+  subtitles?: string[];
+  autoPlay?: boolean;
+  controls?: boolean;
+}
 
+const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
+  src,
+  poster,
+  subtitles = [],
+  autoPlay = false,
+  controls = true,
+}) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [showVolumeDrawer, setShowVolumeDrawer] = useState(false);
-  const [showLoader, setShowLoader] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(null);
-  const [hasInteracted, setHasInteracted] = useState(false); // Nouvel état pour l'interaction utilisateur
-  const isMobile = useIsMobile();
-  const [isPaused, setIsPaused] = useState(true);
-  const [hasEnded, setHasEnded] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [qualityOptions, setQualityOptions] = useState<string[]>([]);
+  const [selectedQuality, setSelectedQuality] = useState<string>("auto");
+  const [showSubtitles, setShowSubtitles] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Synchronise play/pause
+  // HLS support
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
-    video.addEventListener("play", handlePlay);
-    video.addEventListener("pause", handlePause);
-    video.addEventListener("ended", handleEnded);
-    return () => {
-      video.removeEventListener("play", handlePlay);
-      video.removeEventListener("pause", handlePause);
-      video.removeEventListener("ended", handleEnded);
-    };
-  }, []);
+    let hls: Hls | null = null;
+    if (src.endsWith(".m3u8") && !video.canPlayType("application/vnd.apple.mpegurl")) {
+      hls = new Hls();
+      hls.loadSource(src);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        setError("Erreur de streaming HLS");
+      });
+      hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+        if (data.levels) {
+          setQualityOptions(["auto", ...data.levels.map((l: any) => l.height + "p")]);
+        }
+      });
+    }
+    return () => { hls && hls.destroy(); };
+  }, [src]);
 
-  // Synchronise volume/mute
-  useEffect(() => {
+  // Play/pause
+  const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
-    video.volume = volume;
-    video.muted = muted;
-  }, [volume, muted]);
-
-  // Durée et temps courant
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const handleTimeUpdate = () => setCurrentTime(video.currentTime);
-    const handleLoadedMetadata = () => setDuration(video.duration);
-    video.addEventListener("timeupdate", handleTimeUpdate);
-    video.addEventListener("loadedmetadata", handleLoadedMetadata);
-    return () => {
-      video.removeEventListener("timeupdate", handleTimeUpdate);
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-    };
-  }, []);
-
-  // Fullscreen natif
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
-  // Play/pause robuste
-  const togglePlay = async (e) => {
-    if (e) e.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
-    try {
-      if (video.paused || video.ended) {
-        await video.play();
-      } else {
-        video.pause();
-      }
-    } catch (error) {
-      // ignore AbortError
+    if (video.paused) {
+      video.play();
+      setIsPlaying(true);
+    } else {
+      video.pause();
+      setIsPlaying(false);
     }
   };
 
   // Volume
-  const toggleMute = (e) => {
-    if (e) e.stopPropagation();
-    setMuted((m) => !m);
-  };
-  const changeVolume = (e) => {
+  const toggleMute = () => setMuted((m) => !m);
+  const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
     setVolume(parseFloat(e.target.value));
     setMuted(e.target.value === "0");
   };
 
   // Seek
-  const handleSeek = (e) => {
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const video = videoRef.current;
     if (!video) return;
     const newTime = parseFloat(e.target.value);
@@ -109,201 +84,83 @@ export default function XDoseVideoPlayer({ src }) {
   };
 
   // Fullscreen
-  const toggleFullscreen = (e) => {
-    if (e) e.stopPropagation();
-    const el = containerRef.current;
-    if (!el) return;
+  const toggleFullscreen = () => {
+    const video = videoRef.current;
+    if (!video) return;
     if (!document.fullscreenElement) {
-      el.requestFullscreen();
+      video.parentElement?.requestFullscreen();
+      setIsFullscreen(true);
     } else {
       document.exitFullscreen();
+      setIsFullscreen(false);
     }
   };
 
-  // Format temps
-  const formatTime = (s) => {
+  // Playback rate
+  const handlePlaybackRate = (rate: number) => {
+    setPlaybackRate(rate);
+    if (videoRef.current) videoRef.current.playbackRate = rate;
+  };
+
+  // Time update
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const update = () => setCurrentTime(video.currentTime);
+    video.addEventListener("timeupdate", update);
+    video.addEventListener("loadedmetadata", () => setDuration(video.duration));
+    return () => {
+      video.removeEventListener("timeupdate", update);
+    };
+  }, []);
+
+  // Volume/mute sync
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = volume;
+      videoRef.current.muted = muted;
+    }
+  }, [volume, muted]);
+
+  // Format time
+  const formatTime = (s: number) => {
     if (isNaN(s)) return "0:00";
     const m = Math.floor(s / 60);
     const sec = Math.floor(s % 60).toString().padStart(2, "0");
     return `${m}:${sec}`;
   };
 
-  // HLS.js pour lecture universelle
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    let hls;
-    if (src && src.endsWith('.m3u8') && !video.canPlayType('application/vnd.apple.mpegurl')) {
-      if (Hls.isSupported()) {
-        hls = new Hls();
-        hls.loadSource(src);
-        hls.attachMedia(video);
-      }
-    } else {
-      video.src = src;
-    }
-    return () => {
-      if (hls) {
-        hls.destroy();
-      }
-    };
-  }, [src]);
-
-  // Gestion du loader circulaire (affiché si buffering > 300ms)
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    let timeout;
-    const handleWaiting = () => {
-      timeout = setTimeout(() => setShowLoader(true), 300);
-    };
-    const handlePlaying = () => {
-      clearTimeout(timeout);
-      setShowLoader(false);
-    };
-    video.addEventListener("waiting", handleWaiting);
-    video.addEventListener("playing", handlePlaying);
-    video.addEventListener("seeked", handlePlaying);
-    return () => {
-      video.removeEventListener("waiting", handleWaiting);
-      video.removeEventListener("playing", handlePlaying);
-      video.removeEventListener("seeked", handlePlaying);
-      clearTimeout(timeout);
-    };
-  }, []);
-
-  // Marque l'interaction utilisateur dès le premier play/pause
-  useEffect(() => {
-    if (isPlaying && !hasInteracted) setHasInteracted(true);
-  }, [isPlaying, hasInteracted]);
-
   return (
-    <div
-      ref={containerRef}
-      className="xdose-player relative w-full aspect-video bg-black rounded-xl overflow-hidden group select-none"
-      tabIndex={0}
-    >
-      <video
-        ref={videoRef}
-        src={src}
-        className="w-full h-full object-contain"
-        playsInline
-        controls={false}
-        preload="auto"
-        muted={muted}
-        autoPlay
-        onClick={e => { if (!isPlaying) togglePlay(e); }}
-        tabIndex={-1}
-      />
-
-      {/* Overlay bouton play centré si la vidéo est en pause */}
-      {!isPlaying && (
-        <button
-          className="absolute inset-0 flex items-center justify-center z-30 bg-black/30 hover:bg-black/40 transition"
-          style={{ pointerEvents: 'auto' }}
-          aria-label="Lecture"
-          onClick={e => { e.stopPropagation(); togglePlay(e); }}
-        >
-          <Play size={64} className="text-white drop-shadow-lg" />
-        </button>
-      )}
-
-      {/* Overlay “tap to play” avant lecture (mobile) */}
-      {!isPlaying && !hasInteracted && (
-        <button
-          className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-black/40 transition animate-fade-in"
-          style={{ pointerEvents: 'auto' }}
-          aria-label="Appuyez pour lancer la lecture"
-          onClick={e => { e.stopPropagation(); setHasInteracted(true); togglePlay(e); }}
-        >
-          <Play size={64} className="text-white drop-shadow-lg mb-4" />
-          <span className="text-white text-base font-semibold">Appuyez pour lire</span>
-        </button>
-      )}
-
-      {/* Barre de progression custom tout en bas */}
-      <div className="absolute left-0 right-0 bottom-3 z-20 h-2 flex items-center pointer-events-auto">
-        <input
-          type="range"
-          min={0}
-          max={duration}
-          step={0.1}
-          value={currentTime}
-          onChange={handleSeek}
-          className="w-full h-2 accent-brand-purple-500 bg-transparent cursor-pointer progress-bar"
-          aria-label="Barre de progression"
-        />
-      </div>
-
-      {/* Contrôles premium */}
-      <div
-        className="controls-container flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg z-50 w-full max-w-2xl mx-auto mt-4"
-        // STRATÉGIE SAFE FLOW : plus de position absolute/fixed, le container est dans le flow normal, centré, largeur max, jamais masqué
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          minHeight: 40,
-          opacity: 1,
-          pointerEvents: 'auto',
-          width: '100%',
-          maxWidth: 700,
-          margin: '24px auto 0 auto',
-          zIndex: 10001,
-          position: 'static',
-          left: undefined,
-          right: undefined,
-          bottom: undefined,
-          transform: undefined,
-        }}
-        onClick={e => e.stopPropagation()}
-        onMouseDown={e => e.stopPropagation()}
-      >
-        {/* Play/Pause central avec animation pulse */}
-        <button
-          onClick={togglePlay}
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-brand-purple-500/90 hover:bg-brand-purple-600 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-purple-300 transition-all duration-200 animate-pulse-on-play"
-          aria-label={isPlaying ? "Pause" : "Lecture"}
+    <div className="xdose-player-root">
+      <div className="xdose-player-video-wrapper">
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
           tabIndex={0}
-          aria-describedby="tooltip-play"
-          onMouseEnter={() => setShowTooltip('play')}
-          onMouseLeave={() => setShowTooltip(null)}
-        >
-          {isPlaying ? <Pause size={32} /> : <Play size={32} />}
-        </button>
-        {/* Tooltip accessible pour play/pause (desktop) */}
-        {showTooltip === 'play' && (
-          <div id="tooltip-play" role="tooltip" className="absolute left-1/2 -translate-x-1/2 bottom-16 bg-neutral-900 text-white text-xs rounded px-3 py-1 shadow-lg z-50 animate-fade-in">
-            {isPlaying ? 'Pause' : 'Lecture'}
-          </div>
+          controls={false}
+          autoPlay={autoPlay}
+          playsInline
+          aria-label="Lecteur vidéo XDose"
+        />
+        {error && <div className="xdose-player-error">{error}</div>}
+        {/* Overlay play bouton */}
+        {!isPlaying && (
+          <button className="xdose-player-overlay-play" onClick={togglePlay} aria-label="Lecture">
+            <Play size={56} />
+          </button>
         )}
-
-        {/* Drawer/Popover pour volume et options avancées (mobile first) */}
-        <div className="relative flex items-center">
-          <button
-            onClick={() => setShowVolumeDrawer(v => !v)}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-black/40 hover:bg-brand-purple-100 text-white hover:text-brand-purple-700 transition"
-            aria-label={muted || volume === 0 ? "Activer le son" : "Couper le son"}
-            tabIndex={0}
-          >
+      </div>
+      {controls && (
+        <div className="xdose-player-controls">
+          {/* Play/Pause */}
+          <button onClick={togglePlay} aria-label={isPlaying ? "Pause" : "Lecture"}>
+            {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+          </button>
+          {/* Volume */}
+          <button onClick={toggleMute} aria-label={muted ? "Activer le son" : "Couper le son"}>
             {muted || volume === 0 ? <VolumeX size={24} /> : <Volume1 size={24} />}
           </button>
-          {/* Drawer volume mobile : visible si showVolumeDrawer, sinon caché */}
-          {showVolumeDrawer && (
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-12 sm:hidden flex flex-col items-center bg-black/90 rounded-xl px-4 py-3 shadow-lg z-40 animate-fade-in">
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={muted ? 0 : volume}
-                onChange={changeVolume}
-                className="w-32 accent-brand-purple-500"
-                aria-label="Volume"
-              />
-            </div>
-          )}
-          {/* Slider volume desktop : visible uniquement sur sm+ */}
           <input
             type="range"
             min="0"
@@ -311,44 +168,58 @@ export default function XDoseVideoPlayer({ src }) {
             step="0.01"
             value={muted ? 0 : volume}
             onChange={changeVolume}
-            className="hidden sm:inline-block w-24 ml-2 cursor-pointer accent-brand-purple-500"
             aria-label="Volume"
-            tabIndex={0}
-            aria-describedby="tooltip-volume"
-            onMouseEnter={() => setShowTooltip('volume')}
-            onMouseLeave={() => setShowTooltip(null)}
+            className="xdose-player-slider"
           />
-          {/* Tooltip accessible pour le volume (desktop) */}
-          {showTooltip === 'volume' && (
-            <div id="tooltip-volume" role="tooltip" className="absolute left-1/2 -translate-x-1/2 bottom-12 bg-neutral-900 text-white text-xs rounded px-3 py-1 shadow-lg z-50 animate-fade-in">
-              Régler le volume
+          {/* Progression */}
+          <input
+            type="range"
+            min={0}
+            max={duration}
+            step={0.1}
+            value={currentTime}
+            onChange={handleSeek}
+            aria-label="Barre de progression"
+            className="xdose-player-progress"
+          />
+          <span className="xdose-player-time">{formatTime(currentTime)} / {formatTime(duration)}</span>
+          {/* Vitesse */}
+          <button onClick={() => setShowSettings((v) => !v)} aria-label="Paramètres">
+            <Settings size={22} />
+          </button>
+          {/* Fullscreen */}
+          <button onClick={toggleFullscreen} aria-label={isFullscreen ? "Quitter le plein écran" : "Plein écran"}>
+            {isFullscreen ? <Minimize2 size={22} /> : <Maximize2 size={22} />}
+          </button>
+        </div>
+      )}
+      {/* Settings Drawer */}
+      {showSettings && (
+        <div className="xdose-player-settings">
+          <div>
+            <span>Vitesse</span>
+            {[0.5, 1, 1.25, 1.5, 2].map((rate) => (
+              <button key={rate} onClick={() => handlePlaybackRate(rate)} className={playbackRate === rate ? "active" : ""}>{rate}x</button>
+            ))}
+          </div>
+          {qualityOptions.length > 0 && (
+            <div>
+              <span>Qualité</span>
+              {qualityOptions.map((q) => (
+                <button key={q} onClick={() => setSelectedQuality(q)} className={selectedQuality === q ? "active" : ""}>{q}</button>
+              ))}
             </div>
           )}
-        </div>
-
-        {/* Temps courant/total */}
-        <div className="text-white text-xs font-mono min-w-[60px] text-center select-none">
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </div>
-
-        {/* Plein écran */}
-        <button
-          onClick={toggleFullscreen}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-black/40 hover:bg-brand-purple-100 text-white hover:text-brand-purple-700 transition"
-          aria-label={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
-          tabIndex={0}
-          style={{ zIndex: 10001 }}
-        >
-          {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
-        </button>
-      </div>
-
-      {/* Loader circulaire pendant le buffering (affiché si buffering > 300ms) */}
-      {showLoader && (
-        <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
-          <div className="w-12 h-12 border-4 border-brand-purple-500 border-t-transparent rounded-full animate-spin" aria-label="Chargement" />
+          {subtitles.length > 0 && (
+            <div>
+              <span>Sous-titres</span>
+              <button onClick={() => setShowSubtitles((v) => !v)}>{showSubtitles ? "Masquer" : "Afficher"}</button>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
-}
+};
+
+export default XDoseVideoPlayer;
