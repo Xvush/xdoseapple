@@ -263,7 +263,7 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - Mode paysage automatique
 - Contrôles secondaires (volume, qualité, etc.) accessibles via drawer/menu plus
 - Haptique sur double tap seek (mobile/PWA si supporté)
-- Tooltips accessibles (aria-describedby) sur desktop
+- Tooltips accessibles (aria-describedby) sur desktop pour les contrôles principaux
 - Loader circulaire affiché uniquement si buffering > 300ms
 - Overlay “tap to play” avant lecture (mobile)
 - Responsive avancé : certains boutons masqués en paysage ou sur petits écrans

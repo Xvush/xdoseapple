@@ -19,6 +19,8 @@ export default function XDoseVideoPlayer({ src }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [showVolumeDrawer, setShowVolumeDrawer] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(null);
+  const [hasInteracted, setHasInteracted] = useState(false); // Nouvel état pour l'interaction utilisateur
 
   // Synchronise play/pause
   useEffect(() => {
@@ -173,6 +175,11 @@ export default function XDoseVideoPlayer({ src }) {
     };
   }, []);
 
+  // Marque l'interaction utilisateur dès le premier play/pause
+  useEffect(() => {
+    if (isPlaying && !hasInteracted) setHasInteracted(true);
+  }, [isPlaying, hasInteracted]);
+
   return (
     <div
       ref={containerRef}
@@ -204,6 +211,19 @@ export default function XDoseVideoPlayer({ src }) {
           onClick={e => { e.stopPropagation(); togglePlay(e); }}
         >
           <Play size={64} className="text-white drop-shadow-lg" />
+        </button>
+      )}
+
+      {/* Overlay “tap to play” avant lecture (mobile) */}
+      {!isPlaying && !hasInteracted && (
+        <button
+          className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-black/40 transition animate-fade-in"
+          style={{ pointerEvents: 'auto' }}
+          aria-label="Appuyez pour lancer la lecture"
+          onClick={e => { e.stopPropagation(); setHasInteracted(true); togglePlay(e); }}
+        >
+          <Play size={64} className="text-white drop-shadow-lg mb-4" />
+          <span className="text-white text-base font-semibold">Appuyez pour lire</span>
         </button>
       )}
 
@@ -273,9 +293,19 @@ export default function XDoseVideoPlayer({ src }) {
               step="0.01"
               value={muted ? 0 : volume}
               onChange={changeVolume}
-              className="hidden sm:block w-24 ml-2 cursor-pointer accent-brand-purple-500"
+              className="hidden sm:inline-block w-24 ml-2 cursor-pointer accent-brand-purple-500"
               aria-label="Volume"
+              tabIndex={0}
+              aria-describedby="tooltip-volume"
+              onMouseEnter={() => setShowTooltip('volume')}
+              onMouseLeave={() => setShowTooltip(null)}
             />
+            {/* Tooltip accessible pour le volume (desktop) */}
+            {showTooltip === 'volume' && (
+              <div id="tooltip-volume" role="tooltip" className="absolute left-1/2 -translate-x-1/2 bottom-12 bg-neutral-900 text-white text-xs rounded px-3 py-1 shadow-lg z-50 animate-fade-in">
+                Régler le volume
+              </div>
+            )}
           </div>
 
           {/* Temps courant/total */}
