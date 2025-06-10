@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Maximize2, Minimize2, Pause, Play, Volume1, VolumeX } from "lucide-react";
 import "./XDoseVideoPlayer.css";
+import Hls from "hls.js";
 
 export default function XDoseVideoPlayer({ src }) {
   const videoRef = useRef(null);
@@ -125,6 +126,27 @@ export default function XDoseVideoPlayer({ src }) {
     const sec = Math.floor(s % 60).toString().padStart(2, "0");
     return `${m}:${sec}`;
   };
+
+  // HLS.js pour lecture universelle
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let hls;
+    if (src && src.endsWith('.m3u8') && !video.canPlayType('application/vnd.apple.mpegurl')) {
+      if (Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+      }
+    } else {
+      video.src = src;
+    }
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [src]);
 
   return (
     <div
