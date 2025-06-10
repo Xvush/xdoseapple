@@ -32,6 +32,8 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
   const [selectedQuality, setSelectedQuality] = useState<string>("auto");
   const [showSubtitles, setShowSubtitles] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // HLS support
   useEffect(() => {
@@ -122,6 +124,33 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
     }
   }, [volume, muted]);
 
+  // Auto-hide controls after 2.5s inactivity
+  useEffect(() => {
+    if (!showControls) return;
+    if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    controlsTimeout.current = setTimeout(() => setShowControls(false), 2500);
+    return () => controlsTimeout.current && clearTimeout(controlsTimeout.current);
+  }, [showControls, isPlaying, currentTime]);
+
+  // Show controls on mouse/touch activity
+  const showControlsOnActivity = () => {
+    setShowControls(true);
+  };
+
+  // Attach listeners to video wrapper
+  useEffect(() => {
+    const wrapper = document.querySelector('.xdose-player-video-wrapper');
+    if (!wrapper) return;
+    wrapper.addEventListener('mousemove', showControlsOnActivity);
+    wrapper.addEventListener('touchstart', showControlsOnActivity);
+    wrapper.addEventListener('click', showControlsOnActivity);
+    return () => {
+      wrapper.removeEventListener('mousemove', showControlsOnActivity);
+      wrapper.removeEventListener('touchstart', showControlsOnActivity);
+      wrapper.removeEventListener('click', showControlsOnActivity);
+    };
+  }, []);
+
   // Format time
   const formatTime = (s: number) => {
     if (isNaN(s)) return "0:00";
@@ -152,7 +181,7 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
         )}
       </div>
       {controls && (
-        <div className="xdose-player-controls">
+        <div className={`xdose-player-controls${showControls ? '' : ' xdose-player-controls--hidden'}`}>
           {/* Play/Pause */}
           <button onClick={togglePlay} aria-label={isPlaying ? "Pause" : "Lecture"}>
             {isPlaying ? <Pause size={28} /> : <Play size={28} />}

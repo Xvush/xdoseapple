@@ -59,6 +59,11 @@
   z-index: 20;
   transition: box-shadow 0.2s, background 0.2s;
 }
+.xdose-player-controls--hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1);
+}
 .xdose-player-controls button {
   background: none;
   border: none;
