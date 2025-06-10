@@ -59,6 +59,10 @@
 }
 @media (min-width: 641px) {
   .xdose-player .controls-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 40px !important;
     transition: opacity 0.3s ease-in-out;
   }
 }
