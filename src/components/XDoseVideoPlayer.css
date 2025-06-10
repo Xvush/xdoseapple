@@ -6,7 +6,7 @@
   position: relative;
   touch-action: manipulation;
   z-index: 10000 !important;
-  padding-bottom: 80px !important; /* Espace pour la bottom bar/navigation mobile */
+  padding-bottom: 24px !important; /* Juste assez pour le flow, plus de bottom bar massive */
 }
 @media (max-width: 640px) {
   .xdose-player {
@@ -15,37 +15,41 @@
     max-height: 80vw;
     border-radius: 1.2rem;
     touch-action: manipulation;
-    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
-  }
-  .controls-container {
-    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 98vw !important;
-    max-width: 100vw !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
   }
 }
 .controls-container {
+  position: static !important;
+  margin: 24px auto 0 auto !important;
+  width: 100% !important;
+  max-width: 700px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   min-height: 40px !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-  padding-bottom: 1rem;
-  box-sizing: border-box;
-  transition: opacity 0.3s ease-in-out;
+  visibility: visible !important;
+  height: auto !important;
+  z-index: 10001 !important;
+  box-sizing: border-box !important;
+  background: rgba(0,0,0,0.7) !important;
+  border-radius: 1rem !important;
+  outline: 2px solid #a855f7 !important;
+  transition: none !important;
 }
-.xdose-player .controls-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 9999;
-  pointer-events: auto;
-  transition: opacity 0.3s ease-in-out;
+@media (min-width: 641px) {
+  .xdose-player .controls-container {
+    position: static !important;
+    left: unset !important;
+    right: unset !important;
+    bottom: unset !important;
+    transform: unset !important;
+    margin: 24px auto 0 auto !important;
+    width: 100% !important;
+    max-width: 700px !important;
+  }
 }
-
 .xdose-player:fullscreen {
   width: 100% !important;
   height: 100% !important;
