@@ -256,9 +256,18 @@ export default function XDoseVideoPlayer({ src }) {
             className="flex items-center justify-center w-12 h-12 rounded-full bg-brand-purple-500/90 hover:bg-brand-purple-600 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-purple-300 transition-all duration-200 animate-pulse-on-play"
             aria-label={isPlaying ? "Pause" : "Lecture"}
             tabIndex={0}
+            aria-describedby="tooltip-play"
+            onMouseEnter={() => setShowTooltip('play')}
+            onMouseLeave={() => setShowTooltip(null)}
           >
             {isPlaying ? <Pause size={32} /> : <Play size={32} />}
           </button>
+          {/* Tooltip accessible pour play/pause (desktop) */}
+          {showTooltip === 'play' && (
+            <div id="tooltip-play" role="tooltip" className="absolute left-1/2 -translate-x-1/2 bottom-16 bg-neutral-900 text-white text-xs rounded px-3 py-1 shadow-lg z-50 animate-fade-in">
+              {isPlaying ? 'Pause' : 'Lecture'}
+            </div>
+          )}
 
           {/* Drawer/Popover pour volume et options avancées (mobile first) */}
           <div className="relative flex items-center">
