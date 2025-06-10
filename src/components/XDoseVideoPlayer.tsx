@@ -246,6 +246,8 @@ export default function XDoseVideoPlayer({ src }) {
       {/* Contrôles premium */}
       <div
         className="controls-container absolute left-1/2 -translate-x-1/2 bottom-10 sm:bottom-2 w-[95vw] max-w-2xl flex flex-row items-center justify-between gap-2 bg-black/60 rounded-2xl px-3 py-2 shadow-lg z-30"
+        // Vérification : aucune classe sm:hidden, hidden, ou collapse n'est appliquée ici
+        // Les contrôles sont toujours visibles et interactifs sur desktop/mobile
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 40, opacity: 1, pointerEvents: 'auto' }}

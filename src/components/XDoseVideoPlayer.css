@@ -68,7 +68,14 @@
     align-items: center !important;
     justify-content: space-between !important;
     min-height: 40px !important;
-    transition: opacity 0.3s ease-in-out;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    height: auto !important;
+    z-index: 9999 !important;
+    box-sizing: border-box !important;
+    /* Désactive tout masquage ou effondrement */
+    transition: none !important;
   }
 }
 @media (max-width: 640px) {

@@ -315,3 +315,25 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - [ ] Fonctionnalités sociales/premium (partage, PiP, stats)
 - [ ] Lazy loading/optimisation préloader
 - [ ] QA finale et feedback utilisateur
+
+---
+
+# Action Plan XDoseVideoPlayer – 2025-06-10
+
+## Étapes réalisées
+- Refonte du composant XDoseVideoPlayer.tsx avec contrôles premium, overlay, loader, tooltips, drawer volume, responsive, accessibilité, HLS.js, etc.
+- Suppression de toute logique d’auto-hide et d’opacité dynamique pour garantir l’affichage permanent des contrôles.
+- Forçage CSS maximal sur .controls-container (display, opacity, pointer-events, etc.) pour éviter tout effondrement ou masquage.
+- Nettoyage des media queries et suppression de tout conflit d’opacité/pointer-events.
+- Vérification de l’absence de classes sm:hidden, hidden, collapse ou similaires sur controls-container dans XDoseVideoPlayer.tsx (aucune classe conflictuelle trouvée).
+- Application d’un override CSS agressif :
+  - @media (min-width: 641px) { .xdose-player .controls-container { ... } }
+  - Toutes les propriétés critiques sont forcées avec !important pour garantir la visibilité et l’interactivité sur desktop.
+- Tests UX sur desktop et mobile pour valider l’affichage permanent et l’absence de bug d’effondrement.
+
+## Prochaines étapes
+- (Optionnel) Réintroduire l’auto-hide premium uniquement si l’affichage de base reste 100% fiable.
+- Continuer les tests UX sur différents navigateurs et devices.
+
+## Résumé
+Le lecteur XDoseVideoPlayer affiche désormais ses contrôles de façon permanente et fiable sur desktop et mobile, sans bug d’opacité ni d’effondrement du container, même en présence de classes utilitaires ou media queries conflictuelles.
