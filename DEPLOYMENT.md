@@ -35,6 +35,8 @@
 - [Vercel Docs](https://vercel.com/docs)
 - [Prisma Serverless](https://www.prisma.io/docs/orm/prisma-client/deployment/serverless)
 
+fffff
+
 ---
 
 *Ce fichier guide le déploiement de XDose sur Vercel étape par étape.*
