@@ -127,12 +127,15 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
 
   // Auto-hide controls after 2.5s inactivity, always visible if paused OR if mouse is over controls/settings
   useEffect(() => {
+    console.log('[XDoseVideoPlayer] useEffect auto-hide triggered', { isPlaying, showControls });
     if (!isPlaying) {
+      console.log('[XDoseVideoPlayer] Video not playing, controls always visible');
       setShowControls(true);
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
       return;
     }
     if (!showControls) {
+      console.log('[XDoseVideoPlayer] Controls already hidden, skipping auto-hide');
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
       return;
     }
@@ -145,10 +148,12 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
           playerRoot.querySelector('.xdose-player-controls:hover') ||
           playerRoot.querySelector('.xdose-player-settings:hover');
         if (isHovering) {
+          console.log('[XDoseVideoPlayer] Controls/settings hovered, keep controls visible and reset timer');
           // Do nothing, keep controls visible and timer will reset on next activity
           return;
         }
       }
+      console.log('[XDoseVideoPlayer] Hiding controls after inactivity');
       setShowControls(false);
     }, 2500);
 
