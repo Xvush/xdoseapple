@@ -248,6 +248,7 @@ export default function XDoseVideoPlayer({ src }) {
         }`}
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
+        style={{ pointerEvents: showControls ? 'auto' : 'none' }}
       >
         {/* Play/Pause central avec animation pulse */}
         <button
@@ -327,6 +328,7 @@ export default function XDoseVideoPlayer({ src }) {
           className="flex items-center justify-center w-10 h-10 rounded-full bg-black/40 hover:bg-brand-purple-100 text-white hover:text-brand-purple-700 transition"
           aria-label={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
           tabIndex={0}
+          style={{ zIndex: 10001 }}
         >
           {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
         </button>
