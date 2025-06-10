@@ -52,6 +52,7 @@
   width: 98%;
   max-width: 700px;
   box-shadow: 0 2px 16px 0 rgba(0,0,0,0.12);
+  flex-wrap: wrap;
 }
 .xdose-player-controls button {
   background: none;
@@ -66,6 +67,8 @@
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s;
+  min-width: 40px;
+  min-height: 40px;
 }
 .xdose-player-controls button:hover, .xdose-player-settings button.active {
   background: rgba(168,85,247,0.15);
@@ -134,4 +137,39 @@
   z-index: 100;
   font-size: 1rem;
   box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  .xdose-player-root {
+    max-width: 100vw;
+    padding: 0 0.5rem;
+  }
+  .xdose-player-controls {
+    max-width: 98vw;
+    padding: 0.5rem 0.25rem;
+    gap: 0.5rem;
+  }
+  .xdose-player-settings {
+    right: 8px;
+    min-width: 120px;
+    padding: 0.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .xdose-player-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    padding: 0.25rem 0.1rem;
+  }
+  .xdose-player-slider, .xdose-player-progress {
+    width: 100%;
+    max-width: 100%;
+    margin: 0.15rem 0;
+  }
+  .xdose-player-time {
+    font-size: 0.85rem;
+    min-width: 60px;
+  }
 }
