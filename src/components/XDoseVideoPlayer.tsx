@@ -125,7 +125,7 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
     }
   }, [volume, muted]);
 
-  // Auto-hide controls after 2.5s inactivity, always visible if paused OR if mouse is over controls/overlays
+  // Auto-hide controls after 2.5s inactivity, always visible if paused OR if mouse is over controls/settings
   useEffect(() => {
     if (!isPlaying) {
       setShowControls(true);
@@ -135,12 +135,20 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
     if (!showControls) return;
     if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
     controlsTimeout.current = setTimeout(() => {
-      // Ne pas cacher si la souris est sur les contrôles ou overlays
-      const isHovering = document.querySelector('.xdose-player-controls:hover, .xdose-player-overlay:hover, .xdose-player-vignette:hover, .xdose-player-meta-edit:hover');
-      if (!isHovering) setShowControls(false);
+      const playerRoot = playerRootRef.current;
+      if (playerRoot) {
+        const isHovering =
+          playerRoot.querySelector('.xdose-player-controls:hover') ||
+          playerRoot.querySelector('.xdose-player-settings:hover');
+        if (isHovering) {
+          setShowControls(true); // keep visible and reset timer
+          return;
+        }
+      }
+      setShowControls(false);
     }, 2500);
     return () => controlsTimeout.current && clearTimeout(controlsTimeout.current);
-  }, [showControls, isPlaying, currentTime]);
+  }, [showControls, isPlaying]);
 
   // Show controls on user activity (mousemove, touch, click, scroll)
   const showControlsOnActivity = () => {
