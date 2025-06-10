@@ -81,28 +81,31 @@ export default function XDoseVideoPlayer({ src }) {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  // Helper pour savoir si on doit masquer automatiquement les contrôles
+  const shouldAutoHide = isPlaying && (isFullscreen || !isMobile) && hasInteracted;
+
   // Auto-hide des contrôles
   useEffect(() => {
-    // Ne pas masquer si la vidéo n'est pas en cours de lecture ou si les contrôles doivent rester visibles
-    if (!isPlaying || !showControls) {
+    // Toujours afficher les contrôles si la vidéo est en pause, terminée ou jamais lancée
+    if (!isPlaying || hasEnded || isPaused || !hasInteracted) {
+      setShowControls(true);
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
       return;
     }
-    // Condition pour masquer les contrôles : en lecture ET (plein écran OU pas sur mobile)
-    if (isPlaying && (isFullscreen || !isMobile)) {
+    // Masquage auto seulement si shouldAutoHide
+    if (shouldAutoHide) {
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
       controlsTimeout.current = setTimeout(() => {
-        if (isPlaying && (isFullscreen || !isMobile)) {
-          setShowControls(false);
-        }
+        if (shouldAutoHide) setShowControls(false);
       }, 3000);
     } else {
+      setShowControls(true);
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
     }
     return () => {
       if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
     };
-  }, [isPlaying, isFullscreen, showControls, isMobile]);
+  }, [isPlaying, isFullscreen, showControls, isMobile, isPaused, hasEnded, hasInteracted, shouldAutoHide]);
 
   // Play/pause robuste
   const togglePlay = async (e) => {
@@ -216,9 +219,7 @@ export default function XDoseVideoPlayer({ src }) {
       onMouseMove={() => setShowControls(true)}
       onClick={() => setShowControls(true)}
       onMouseLeave={() => {
-        if (isPlaying && (isFullscreen || !isMobile)) {
-          setShowControls(false);
-        }
+        if (shouldAutoHide) setShowControls(false);
       }}
     >
       <video
