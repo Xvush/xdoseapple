@@ -30,9 +30,15 @@ export default function XDoseVideoPlayer({ src }) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    const handlePlay = () => { setIsPlaying(true); setIsPaused(false); setHasEnded(false); };
-    const handlePause = () => { setIsPlaying(false); setIsPaused(true); };
-    const handleEnded = () => { setIsPlaying(false); setIsPaused(false); setHasEnded(true); };
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => {
+      setIsPlaying(false);
+      setShowControls(true);
+    };
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setShowControls(true);
+    };
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("ended", handleEnded);
@@ -77,17 +83,26 @@ export default function XDoseVideoPlayer({ src }) {
 
   // Auto-hide des contrôles
   useEffect(() => {
-    // Toujours afficher les contrôles si la vidéo est en pause ou terminée
-    if (!isPlaying || isPaused || hasEnded) {
-      setShowControls(true);
+    // Ne pas masquer si la vidéo n'est pas en cours de lecture ou si les contrôles doivent rester visibles
+    if (!isPlaying || !showControls) {
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
       return;
     }
-    // Masquer automatiquement après délai seulement si en lecture et (en plein écran OU sur desktop)
-    if (!isFullscreen && isMobile) return;
-    if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
-    controlsTimeout.current = setTimeout(() => setShowControls(false), 3000);
-    return () => controlsTimeout.current && clearTimeout(controlsTimeout.current);
-  }, [isPlaying, isFullscreen, showControls, isMobile, isPaused, hasEnded]);
+    // Condition pour masquer les contrôles : en lecture ET (plein écran OU pas sur mobile)
+    if (isPlaying && (isFullscreen || !isMobile)) {
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+      controlsTimeout.current = setTimeout(() => {
+        if (isPlaying && (isFullscreen || !isMobile)) {
+          setShowControls(false);
+        }
+      }, 3000);
+    } else {
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    }
+    return () => {
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    };
+  }, [isPlaying, isFullscreen, showControls, isMobile]);
 
   // Play/pause robuste
   const togglePlay = async (e) => {
@@ -201,7 +216,7 @@ export default function XDoseVideoPlayer({ src }) {
       onMouseMove={() => setShowControls(true)}
       onClick={() => setShowControls(true)}
       onMouseLeave={() => {
-        if (isFullscreen || !isMobile) {
+        if (isPlaying && (isFullscreen || !isMobile)) {
           setShowControls(false);
         }
       }}
