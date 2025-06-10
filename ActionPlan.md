@@ -292,3 +292,26 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - `screen.orientation.lock()` pour le mode paysage
 - Tester l'accessibilité (a11y) sur mobile et desktop
 - Privilégier une évolution incrémentale des contrôles pour faciliter la QA et le feedback UX
+
+---
+
+# Changements et Corrections Récents
+
+## Correctifs Apportés
+- [x] Bloc controls-container toujours monté, gestion de l'affichage par classes CSS (opacity/pointer-events), suppression du test showControls && (...), debug desktop OK
+- [x] Contrôles premium (play/pause, volume, mute, seek, fullscreen) accessibles, overlay tap-to-play, loader circulaire, drawer volume mobile, slider volume desktop, tooltips accessibles
+- [x] Animation pulse sur play/pause, fade-in, responsive, safe-area, padding, hover desktop
+- [x] HLS.js intégré pour lecture universelle .m3u8
+- [x] Auto-hide des contrôles (3s d’inactivité en fullscreen), apparition/disparition fluide
+- [x] Correction bug volume desktop (slider visible sur sm:inline-block)
+- [x] Correction de l’appel XDoseVideoPlayer dans Profile.tsx (prop src)
+- [x] Tests et validation UX mobile/desktop
+
+## Prochaines étapes (optionnel)
+- [ ] Haptique double tap seek (mobile/PWA)
+- [ ] Responsive avancé (masquer certains boutons en paysage/petit écran)
+- [ ] Sécurité/confidentialité (désactiver clic droit, masquer URL)
+- [ ] Accessibilité avancée (navigation clavier, annonces ARIA, test lecteurs d’écran)
+- [ ] Fonctionnalités sociales/premium (partage, PiP, stats)
+- [ ] Lazy loading/optimisation préloader
+- [ ] QA finale et feedback utilisateur
