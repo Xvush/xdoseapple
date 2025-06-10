@@ -144,11 +144,18 @@ const XDoseVideoPlayer: React.FC<XDoseVideoPlayerProps> = ({
 
   useEffect(() => {
     const wrapper = document.querySelector('.xdose-player-video-wrapper');
-    if (!wrapper) return;
+    const controls = document.querySelector('.xdose-player-controls');
+    // Ajout : tous les overlays ou modals qui pourraient capter l'activité
+    const overlays = Array.from(document.querySelectorAll('.xdose-player-overlay, .xdose-player-vignette, .xdose-player-meta-edit'));
     const events = ['mousemove', 'touchstart', 'click', 'scroll'];
-    events.forEach((event) => wrapper.addEventListener(event, showControlsOnActivity));
+    const allTargets = [wrapper, controls, ...overlays].filter(Boolean);
+    allTargets.forEach(target => {
+      events.forEach(event => target.addEventListener(event, showControlsOnActivity));
+    });
     return () => {
-      events.forEach((event) => wrapper.removeEventListener(event, showControlsOnActivity));
+      allTargets.forEach(target => {
+        events.forEach(event => target.removeEventListener(event, showControlsOnActivity));
+      });
     };
   }, []);
 
