@@ -1,42 +1,42 @@
 # Plan d’Adaptation de la Page Feed (Mobile)
 
 ## 1. Typographie
-- Utiliser **SF Pro** (ou fallback : Inter, Nunito Sans, Manrope)
-- Poids : medium pour les titres, regular pour le reste
+- [x] Utiliser **SF Pro** (ou fallback : Inter, Nunito Sans, Manrope)
+- [x] Poids : medium pour les titres, regular pour le reste
 
 ## 2. Layout Général
-- Vertical, padding horizontal `px-4`
-- `pt-[env(safe-area-inset-top)]` pour la marge supérieure sur iOS
-- Espacement vertical entre les éléments : `gap-4`
+- [x] Vertical, padding horizontal `px-4`
+- [x] `pt-[env(safe-area-inset-top)]` pour la marge supérieure sur iOS
+- [x] Espacement vertical entre les éléments : `gap-4`
 
 ## 3. Carte Principale (Post vedette)
-- Image large, ratio 4:3, coins arrondis `rounded-xl`
-- Nom en gras, like (icône cœur) à droite, nombre de likes
-- Temps en bas à gauche
+- [x] Image large, ratio 4:3, coins arrondis `rounded-xl`
+- [x] Nom en gras, like (icône cœur) à droite, nombre de likes
+- [x] Temps en bas à gauche
 
 ## 4. Grille Secondaire (2x2)
-- Deux cartes côte à côte, gap `gap-4`
-- Ratio carré, coins arrondis `rounded-xl`
-- Overlay play sur les vidéos
-- Nom et temps en dessous
+- [x] Deux cartes côte à côte, gap `gap-4`
+- [x] Ratio carré, coins arrondis `rounded-xl`
+- [x] Overlay play sur les vidéos
+- [x] Nom et temps en dessous
 
 ## 5. Couleurs et Icônes
-- Fond : `bg-[#FAFAFA]`
-- Texte : `text-[#222]` ou `text-[#555]`
-- Icônes minimalistes (Heroicons, Lucide)
+- [x] Fond : `bg-[#FAFAFA]`
+- [x] Texte : `text-[#222]` ou `text-[#555]`
+- [x] Icônes minimalistes (Heroicons, Lucide)
 
 ## 6. Navigation
-- Barre de navigation fixe en bas, fond blanc, ombre légère `shadow-sm`
-- Icônes : Home (rempli si actif), Profile
+- [x] Barre de navigation fixe en bas, fond blanc, ombre légère `shadow-sm`
+- [x] Icônes : Home (rempli si actif), Profile
 
 ## 7. Responsive & Accessibilité
-- Touch targets min 44x44px
-- Safe Area Insets pour iOS
-- Animation scale sur tap
+- [x] Touch targets min 44x44px
+- [x] Safe Area Insets pour iOS
+- [x] Animation scale sur tap
 
 ## 8. Bonus
-- Skeleton loader pour le chargement
-- Lazy loading/pagination
+- [x] Skeleton loader pour le chargement
+- [x] Lazy loading/pagination
 
 ---
 
@@ -239,3 +239,4 @@ Gestion du thème sombre/clair
 Version accessible aux lecteurs d’écran
 Optimisation Lighthouse ≥ 90
 Tests automatisés (Jest, Cypress, Testing Library)
+```

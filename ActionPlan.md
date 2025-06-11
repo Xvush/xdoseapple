@@ -74,10 +74,10 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 - [x] UI premium, transitions animées
 
 ### 3.2. Upload & publication
-- [ ] Upload sécurisé des médias (images, vidéos)
-- [ ] Gestion des formats et compression
-- [ ] Publication immédiate ou planifiée
-- [ ] Feedback utilisateur (succès/erreur)
+- [x] Upload sécurisé des médias (images, vidéos)
+- [x] Gestion des formats et compression
+- [x] Publication immédiate ou planifiée
+- [x] Feedback utilisateur (succès/erreur)
 
 ---
 
@@ -150,7 +150,7 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 
 ## 🟡 À faire (prochaines étapes)
 - [ ] Ajout de la gestion du titre, description, tags, etc. lors de l’upload vidéo (frontend + backend + Prisma si besoin).
-- [ ] Améliorer le lecteur vidéo (player, UX, preview, etc.).
+- [x] Améliorer le lecteur vidéo (player, UX, preview, etc.).
 - [ ] (Optionnel) Scripts d’insertion de données de test (users, vidéos).
 - [ ] (Optionnel) Rendre certains champs obligatoires dans Prisma après migration.
 - [ ] Tests finaux et QA sur l’ensemble du flow créateur.
@@ -175,7 +175,7 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
   - Affichage fluide, UX premium sur mobile et desktop
 - [ ] 3. Accessibilité et internationalisation (sous-titres, clavier, mobile)
 - [ ] 4. Fonctionnalités sociales et premium (partage, PiP, stats)
-- [X] 5. Performance et adaptabilité (HLS/DASH, lazy loading)
+- [x] 5. Performance et adaptabilité (HLS/DASH, lazy loading)
 - [ ] 6. Sécurité et confidentialité (désactiver clic droit, masquer URL)
 
 ---
@@ -284,7 +284,7 @@ Ce plan d'action détaille la migration complète de Supabase vers Prisma/Postgr
 1. [x] Implémenter les styles mobiles (responsive, safe-area, touch-action)
 2. [x] Refonte de l'UI des contrôles (mobile first, accessibilité, ergonomie)
 3. [x] Ajouter les animations (auto-hide, pulse, transitions)
-4. [ ] Optimiser le chargement (lazy loading, préloader, gestion HLS)
+4. [x] Optimiser le chargement (lazy loading, préloader, gestion HLS)
 
 ## Bonnes Pratiques
 - Utiliser `safe-area-inset` pour iOS

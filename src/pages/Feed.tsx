@@ -1,126 +1,119 @@
 import { useState, useEffect } from "react";
+import { UserIcon } from "@heroicons/react/24/solid";
+import FeedMainCard from "@/components/FeedMainCard";
+import FeedGridCard from "@/components/FeedGridCard";
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import PostCard from "@/components/PostCard";
 
-const feedPosts = [
-	{
-		id: 1,
-		username: "jane_cooper",
-		avatar: "/lovable-uploads/99b5ec0d-8b0b-4099-b7eb-04f239fe2d31.png",
-		image: "/lovable-uploads/99b5ec0d-8b0b-4099-b7eb-04f239fe2d31.png",
-		caption: "Nouvelle session photo avec cette lumière naturelle parfaite ✨",
-		likes: 2847,
-		comments: 89,
-		timeAgo: "2h",
-	},
+// Données de test (à remplacer par un fetch plus tard)
+const featuredPost = {
+	id: 1,
+	username: "Jane Cooper",
+	image: "/images/feed.png",
+	likes: 212,
+	timeAgo: "5h",
+	isVideo: false,
+};
+const gridPosts = [
 	{
 		id: 2,
-		username: "emma_photo",
-		avatar: "/lovable-uploads/7ec6a124-1c1b-4e01-80a9-cb913f60aaba.png",
-		image: "/lovable-uploads/7ec6a124-1c1b-4e01-80a9-cb913f60aaba.png",
-		caption:
-			"Derrière les coulisses de ma dernière création. Photographe et storyteller passionnée 📸",
-		likes: 5243,
-		comments: 156,
-		timeAgo: "4h",
-		isPremium: true,
-		price: "9,99€",
+		username: "Ronald Richards",
+		image: "/images/profile.png",
+		timeAgo: "8h",
+		isVideo: false,
 	},
 	{
 		id: 3,
-		username: "visual_arts",
-		avatar: "/lovable-uploads/d165fa45-7ad1-4879-ad72-974e27879f72.png",
-		image: "/lovable-uploads/d165fa45-7ad1-4879-ad72-974e27879f72.png",
-		caption:
-			"Réglages de post-production pour cette ambiance cinématographique",
-		likes: 1832,
-		comments: 34,
-		timeAgo: "6h",
+		username: "Leslie Alexander",
+		image: "/images/profile.png",
+		timeAgo: "12h",
+		isVideo: true,
 	},
 	{
 		id: 4,
-		username: "alex_creator",
-		avatar: "/lovable-uploads/5ae50604-431b-4b7c-b9a4-ff64cfbff468.png",
-		image: "/lovable-uploads/5ae50604-431b-4b7c-b9a4-ff64cfbff468.png",
-		caption:
-			"Collection XDose - Découvrez mes dernières créations visuelles",
-		likes: 3621,
-		comments: 98,
-		timeAgo: "8h",
-		isPremium: true,
-		price: "4,99€",
+		username: "Alex Creator",
+		image: "/images/profile.png",
+		timeAgo: "16h",
+		isVideo: false,
+	},
+	{
+		id: 5,
+		username: "Sophie Lens",
+		image: "/images/profile.png",
+		timeAgo: "1j",
+		isVideo: true,
 	},
 ];
 
-const Feed = () => {
+export default function Feed() {
 	const [isLoading, setIsLoading] = useState(true);
-	const [visiblePosts, setVisiblePosts] = useState<typeof feedPosts>([]);
+	const [visibleCount, setVisibleCount] = useState(3); // 1 principale + 2 secondaires
 
 	useEffect(() => {
-		// Simulate loading
-		const timer = setTimeout(() => {
-			setIsLoading(false);
-			// Animate posts appearing one by one
-			feedPosts.forEach((post, index) => {
-				setTimeout(() => {
-					setVisiblePosts((prev) => [...prev, post]);
-				}, index * 150);
-			});
-		}, 800);
-
+		const timer = setTimeout(() => setIsLoading(false), 900);
 		return () => clearTimeout(timer);
 	}, []);
 
+	const handleLoadMore = () => {
+		setVisibleCount((prev) => Math.min(prev + 2, gridPosts.length));
+	};
+
+	// Sépare la carte principale et la grille secondaire
+	const main = featuredPost;
+	const grid = gridPosts.slice(0, visibleCount);
+	const hasMore = visibleCount < gridPosts.length;
+
 	return (
-		<div className="pb-24 pt-24 min-h-screen ios-scroll">
+		<div className="min-h-screen bg-[#FAFAFA] pt-[env(safe-area-inset-top)] pb-20 px-4 font-sans">
+			{/* Header XDose original */}
 			<Header currentView="feed" onViewChange={() => {}} />
-			<div className="max-w-md mx-auto">
-				<div
-					className="animate-fade-in"
-					style={{ animationDelay: "200ms" }}
-				>
-					{/* <StoryBar /> */}
-				</div>
-				<div className="px-6 py-4 space-y-8">
-					{isLoading ? (
-						Array.from({ length: 3 }).map((_, index) => (
-							<div
-								key={index}
-								className="space-y-4 animate-fade-in"
-								style={{ animationDelay: `${index * 100}ms` }}
-							>
-								<div className="flex items-center space-x-3">
-									<div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-									<div className="space-y-2 flex-1">
-										<div className="h-4 w-24 bg-gray-200 animate-pulse" />
-										<div className="h-3 w-16 bg-gray-200 animate-pulse" />
-									</div>
+			<main className="flex flex-col gap-4 max-w-md mx-auto">
+				{/* Loader skeleton */}
+				{isLoading ? (
+					<>
+						<div className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
+							<div className="w-full aspect-[4/3] bg-gray-200" />
+							<div className="h-5 w-1/2 bg-gray-200 mx-3 my-2 rounded" />
+							<div className="h-4 w-1/4 bg-gray-200 mx-3 mb-2 rounded" />
+						</div>
+						<div className="grid grid-cols-2 gap-4">
+							{[0, 1].map((i) => (
+								<div
+									key={i}
+									className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse"
+								>
+									<div className="w-full aspect-square bg-gray-200" />
+									<div className="h-5 w-2/3 bg-gray-200 mx-3 my-2 rounded" />
+									<div className="h-4 w-1/4 bg-gray-200 mx-3 mb-2 rounded" />
 								</div>
-								<div className="h-80 w-full bg-gray-200 animate-pulse" />
-								<div className="space-y-2">
-									<div className="h-4 w-32 bg-gray-200 animate-pulse" />
-									<div className="h-3 w-full bg-gray-200 animate-pulse" />
-									<div className="h-3 w-3/4 bg-gray-200 animate-pulse" />
-								</div>
-							</div>
-						))
-					) : (
-						visiblePosts.map((post, index) => (
-							<div
-								key={post.id}
-								className="animate-spring-in"
-								style={{ animationDelay: `${index * 150}ms` }}
+							))}
+						</div>
+					</>
+				) : (
+					<>
+						{/* Carte principale */}
+						<FeedMainCard {...main} likes={main.likes || 0} />
+						{/* Grille secondaire */}
+						<div className="grid grid-cols-2 gap-4">
+							{grid.map((post) => (
+								<FeedGridCard key={post.id} {...post} />
+							))}
+						</div>
+						{/* Bouton Charger plus */}
+						{hasMore && (
+							<button
+								className="w-full mt-2 py-2 rounded-xl bg-[#F3F3F3] text-[#555] font-medium active:scale-95 transition-transform shadow-sm"
+								onClick={handleLoadMore}
+								aria-label="Charger plus de posts"
 							>
-								<PostCard post={post} />
-							</div>
-						))
-					)}
-				</div>
-			</div>
+								Charger plus
+							</button>
+						)}
+					</>
+				)}
+			</main>
+			{/* Barre de navigation XDose originale */}
 			<BottomNavigation currentView="feed" onViewChange={() => {}} />
 		</div>
 	);
-};
-
-export default Feed;
+}
