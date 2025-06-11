@@ -7,3 +7,27 @@
   box-shadow: 0 4px 24px 0 rgba(80,0,180,0.10);
 }
 */
+
+/* XDoseVideoPlayer.css - Video.js player Apple-like premium sizing */
+
+.video-js {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(80,0,180,0.10);
+  background: #000;
+}
+
+@media (max-width: 900px) {
+  .video-js {
+    max-width: 98vw;
+    border-radius: 1rem;
+  }
+}
+@media (max-width: 600px) {
+  .video-js {
+    max-width: 100vw;
+    border-radius: 0.7rem;
+  }
+}
