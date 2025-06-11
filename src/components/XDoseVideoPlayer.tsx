@@ -1,6 +1,7 @@
 // XDoseVideoPlayer.tsx
 import React from "react";
 import VideoJSPlayer from "./VideoJSPlayer";
+import './XDoseVideoPlayer.css';
 
 export interface XDoseVideoPlayerProps {
   src: string;
