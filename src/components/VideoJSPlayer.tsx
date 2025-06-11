@@ -31,7 +31,7 @@ const VideoJSPlayer: React.FC<VideoJSPlayerProps> = ({ src, poster, autoPlay = f
   }, [src, poster, autoPlay]);
 
   return (
-    <div data-vjs-player>
+    <div data-vjs-player style={{ width: '100%', maxWidth: 800, margin: '0 auto', borderRadius: '1.2rem', boxShadow: '0 4px 24px 0 rgba(80,0,180,0.10)', background: '#000', overflow: 'hidden' }}>
       <video ref={videoNode} className="video-js vjs-big-play-centered" playsInline />
     </div>
   );
