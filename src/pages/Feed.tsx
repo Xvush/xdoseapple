@@ -1,67 +1,36 @@
 import { useState, useEffect } from "react";
-import { UserIcon } from "@heroicons/react/24/solid";
 import FeedMainCard from "@/components/FeedMainCard";
 import FeedGridCard from "@/components/FeedGridCard";
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
 
-// Données de test (à remplacer par un fetch plus tard)
-const featuredPost = {
-	id: 1,
-	username: "Jane Cooper",
-	image: "/images/feed.png",
-	likes: 212,
-	timeAgo: "5h",
-	isVideo: false,
-};
-const gridPosts = [
-	{
-		id: 2,
-		username: "Ronald Richards",
-		image: "/images/profile.png",
-		timeAgo: "8h",
-		isVideo: false,
-	},
-	{
-		id: 3,
-		username: "Leslie Alexander",
-		image: "/images/profile.png",
-		timeAgo: "12h",
-		isVideo: true,
-	},
-	{
-		id: 4,
-		username: "Alex Creator",
-		image: "/images/profile.png",
-		timeAgo: "16h",
-		isVideo: false,
-	},
-	{
-		id: 5,
-		username: "Sophie Lens",
-		image: "/images/profile.png",
-		timeAgo: "1j",
-		isVideo: true,
-	},
-];
-
 export default function Feed() {
 	const [isLoading, setIsLoading] = useState(true);
+	const [posts, setPosts] = useState<any[]>([]);
 	const [visibleCount, setVisibleCount] = useState(3); // 1 principale + 2 secondaires
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const timer = setTimeout(() => setIsLoading(false), 900);
-		return () => clearTimeout(timer);
+		setIsLoading(true);
+		fetch("/api/feed")
+			.then(async (res) => {
+				if (!res.ok) throw new Error("Erreur lors du chargement du feed");
+				const data = await res.json();
+				setPosts(data.posts || []);
+				setError(null);
+			})
+			.catch(() => setError("Impossible de charger le feed (erreur réseau ou API)"))
+			.finally(() => setIsLoading(false));
 	}, []);
 
 	const handleLoadMore = () => {
-		setVisibleCount((prev) => Math.min(prev + 2, gridPosts.length));
+		setVisibleCount((prev) => Math.min(prev + 2, posts.length - 1));
 	};
 
 	// Sépare la carte principale et la grille secondaire
-	const main = featuredPost;
-	const grid = gridPosts.slice(0, visibleCount);
-	const hasMore = visibleCount < gridPosts.length;
+	const main = posts[0];
+	const grid = posts.slice(1, visibleCount + 1);
+	const hasMore = posts.length > visibleCount + 1;
 
 	return (
 		<div className="min-h-screen bg-[#FAFAFA] pt-[env(safe-area-inset-top)] pb-20 px-4 font-sans">
@@ -89,6 +58,10 @@ export default function Feed() {
 							))}
 						</div>
 					</>
+				) : error ? (
+					<div className="text-center text-red-500 py-8">{error}</div>
+				) : posts.length === 0 ? (
+					<div className="text-center text-neutral-500 py-8">Aucun post à afficher.</div>
 				) : (
 					<>
 						{/* Carte principale */}
