@@ -1,6 +1,6 @@
 // api/video-edit.js
 // PATCH /api/video-edit.js?id=VIDEO_ID
-// Permet à un créateur d’éditer les métadonnées (titre, description, tags) d’une vidéo dont il est propriétaire
+// Permet à un créateur d'éditer les métadonnées (titre, description, tags) d'une vidéo dont il est propriétaire
 
 const prisma = require('./lib/prisma.js');
 const { z } = require('zod');
@@ -23,31 +23,35 @@ module.exports = async (req, res) => {
     return;
   }
   // Authentification simple par userId dans le body (à remplacer par vrai auth en prod)
-  const { userId, title, description, tags } = req.body;
+  const { userId, title, description, tags, thumbnailUrl } = req.body;
   if (!userId) {
     res.status(401).json({ error: 'Non authentifié' });
     return;
   }
-  // Validation des champs
+  // Validation des champs (thumbnailUrl est optionnel)
   const validation = videoEditSchema.safeParse({ title, description, tags });
   if (!validation.success) {
     res.status(400).json({ error: 'Champs invalides', details: validation.error.errors });
     return;
   }
-  // Vérifie que la vidéo existe et appartient à l’utilisateur
+  // Vérifie que la vidéo existe et appartient à l'utilisateur
   const video = await prisma.video.findUnique({ where: { id } });
   if (!video || video.userId !== userId) {
     res.status(403).json({ error: 'Non autorisé' });
     return;
   }
   // Mise à jour des champs
+  const updateData = {
+    title,
+    description: description || null,
+    tags: tags || [],
+  };
+  if (typeof thumbnailUrl === 'string' && thumbnailUrl.length > 0) {
+    updateData.thumbnailUrl = thumbnailUrl;
+  }
   const updated = await prisma.video.update({
     where: { id },
-    data: {
-      title,
-      description: description || null,
-      tags: tags || [],
-    },
+    data: updateData,
   });
   res.status(200).json({ video: updated });
 };

@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Image, Video, Mic, Palette, Type, Music, Sparkles, Send, AlertTriangle, Loader2, X } from "lucide-react";
@@ -21,10 +22,12 @@ const Studio = () => {
   const [videoDescription, setVideoDescription] = useState("");
   const [tags, setTags] = useState([]); // tags séparés par virgule
 
-  // Wizard d’upload vidéo (UX premium)
+  // Wizard d'upload vidéo (UX premium)
   const [wizardStep, setWizardStep] = useState(1);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string>("");
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
 
   // Validation pour activer le bouton "Suivant"
   const isStep1Valid = videoFile && videoTitle.trim().length > 0 && tags.length > 0;
@@ -48,6 +51,12 @@ const Studio = () => {
       // Générer un thumbnail preview (optionnel, ici via URL.createObjectURL)
       setThumbnailUrl(URL.createObjectURL(file));
     }
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setThumbnailFile(file || null);
+    setThumbnailPreview(file ? URL.createObjectURL(file) : "");
   };
 
   const handleNext = () => setWizardStep(2);
@@ -82,13 +91,34 @@ const Studio = () => {
           setUploadProgress(Math.round((event.loaded / event.total) * 100));
         }
       };
-      xhr.onload = () => {
+      xhr.onload = async () => {
         setUploading(false);
         if (xhr.status === 200) {
+          let uploadedThumbnailUrl = null;
+          if (thumbnailFile && data.uploadId) {
+            // 1. Upload de la miniature sur /api/upload-image.js
+            const imageRes = await fetch("/api/upload-image.js", {
+              method: "POST",
+              headers: { "Content-Type": thumbnailFile.type },
+              body: thumbnailFile
+            });
+            const imageData = await imageRes.json();
+            if (imageData.url) {
+              uploadedThumbnailUrl = imageData.url;
+              // 2. PATCH /api/video-edit.js pour mettre à jour thumbnailUrl
+              await fetch(`/api/video-edit.js?id=${data.uploadId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: user.id, thumbnailUrl: uploadedThumbnailUrl })
+              });
+            }
+          }
           setUploadSuccess(true);
           setWizardStep(1); // Reset wizard
           setVideoFile(null);
           setThumbnailUrl("");
+          setThumbnailFile(null);
+          setThumbnailPreview("");
           setVideoTitle("");
           setVideoDescription("");
           setTags([]);
@@ -237,6 +267,15 @@ const Studio = () => {
                 rows={2}
                 disabled={uploading}
               />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailChange}
+                disabled={uploading}
+              />
+              {thumbnailPreview && (
+                <img src={thumbnailPreview} alt="Aperçu miniature" className="w-32 h-20 object-cover rounded mt-2" />
+              )}
               <TagInput tags={tags} setTags={setTags} disabled={uploading} />
               <div className="flex gap-2 mt-4">
                 <Button className="flex-1 apple-button-secondary rounded-xl" onClick={handleNext} disabled={!isStep1Valid || uploading}>

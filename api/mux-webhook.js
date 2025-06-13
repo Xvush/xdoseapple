@@ -61,7 +61,12 @@ module.exports = async (req, res) => {
         muxPlaybackId: asset.playback_ids[0]?.id || '',
         status: 'ready',
         duration: asset.duration ? Math.round(asset.duration) : null,
-        thumbnailUrl: asset.static_renditions?.status === 'ready' ? asset.static_renditions.gif : null,
+        thumbnailUrl:
+          asset.static_renditions?.status === 'ready' && asset.static_renditions.gif
+            ? asset.static_renditions.gif
+            : (asset.playback_ids[0]?.id
+                ? `https://image.mux.com/${asset.playback_ids[0].id}/thumbnail.jpg`
+                : null),
       }
     });
   }

@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import FeedMainCard from "@/components/FeedMainCard";
 import FeedGridCard from "@/components/FeedGridCard";
@@ -65,11 +66,22 @@ export default function Feed() {
 				) : (
 					<>
 						{/* Carte principale */}
-						<FeedMainCard {...main} likes={main.likes || 0} />
+						<FeedMainCard
+							image={main.thumbnailUrl}
+							username={main.user?.displayName || ''}
+							likes={main.likes || 0}
+							timeAgo={main.timeAgo}
+						/>
 						{/* Grille secondaire */}
 						<div className="grid grid-cols-2 gap-4">
 							{grid.map((post) => (
-								<FeedGridCard key={post.id} {...post} />
+								<FeedGridCard
+									key={post.id}
+									image={post.thumbnailUrl}
+									username={post.user?.displayName || ''}
+									timeAgo={post.timeAgo}
+									isVideo={!!post.muxPlaybackId}
+								/>
 							))}
 						</div>
 						{/* Bouton Charger plus */}
